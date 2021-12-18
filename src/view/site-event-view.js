@@ -17,13 +17,15 @@ const dataFormater = (value, type) => {
 };
 
 const fsfs = (obj) => {
+  // const {type, offers} = obj;
+
   console.log(obj);
 
   return ` ${obj.length > 0 ? `  <h4 class="visually-hidden">Offers:</h4>
   <ul class="event__selected-offers">
-    ${obj.map(({id, title, price}) => `
+    ${obj.map(({id, description, price}) => `
       <li id=${id} class="event__offer">
-    <span class="event__offer-title">${title}</span>
+    <span class="event__offer-title">${description}</span>
     &plus;&euro;&nbsp;
     <span class="event__offer-price">${price}</span>
   </li>

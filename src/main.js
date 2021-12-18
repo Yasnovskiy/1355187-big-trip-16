@@ -5,9 +5,9 @@ import {createSiteSortTemplate} from './view/site-sort-view.js';
 import {createSiteAddNewTemplate} from './view/site-add-new-view.js';
 import {createSiteEventTemplate} from './view/site-event-view.js';
 import {createSiteEventsListTemplate} from './view/site-events-list-view.js';
-import {generateMockData, arrayPoints} from './mock/trip.js';
-
 import {renderTemplate, RenderPosition} from './render.js';
+import {generateMockData} from './mock/trip.js';
+import {arrayPoints} from './mock/point.js';
 
 const TASK_COUNT = 3;
 
@@ -28,7 +28,7 @@ const siteEventsListElement = siteMain.querySelector('.trip-events__list');
 renderTemplate(siteEventsListElement, createSiteSortTemplate(), RenderPosition.BEFOREBEGIN);
 renderTemplate(siteEventsListElement, createSiteAddNewTemplate(newDestination), RenderPosition.AFTERBEGIN);
 
-for (let i = 0; i < TASK_COUNT; i++) {
+for (let i = 0; i < arrayPoints.length; i++) {
   renderTemplate(siteEventsListElement, createSiteEventTemplate(arrayPoints[i]), RenderPosition.BEFOREEND);
 }
 

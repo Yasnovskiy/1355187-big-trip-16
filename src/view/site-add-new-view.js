@@ -1,5 +1,5 @@
 const createImgTemplate = (obj) => {
-  console.log('2', obj.length);
+  console.log();
 
   return ` ${obj.length > 0 ? `<div class="event__photos-container">
   <div class="event__photos-tape">
@@ -11,15 +11,15 @@ const createImgTemplate = (obj) => {
 
 
 const createOffersemplate = (obj) => {
-  console.log('3', obj[0].offers.length);
+  console.log();
 
   return ` ${obj[0].offers.length > 0 ? `<section class="event__section  event__section--offers">
   <h3 class="event__section-title  event__section-title--offers">Offers</h3>
   <div class="event__available-offers">
-    ${obj[0].offers.map(({id, title, price}) => `<div class="event__offer-selector">
+    ${obj[0].offers.map(({id, description, price}) => `<div class="event__offer-selector">
       <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${id}" type="checkbox" name="event-offer-luggage" checked>
       <label class="event__offer-label" for="event-offer-luggage-${id}">
-        <span class="event__offer-title">${title}</span>
+        <span class="event__offer-title">${description}</span>
         &plus;&euro;&nbsp;
         <span class="event__offer-price">${price} </span>
       </label>
@@ -27,10 +27,9 @@ const createOffersemplate = (obj) => {
     </section>`: ''}`;
 };
 
-
 export const createSiteAddNewTemplate = (obj) => {
-  const { destination, offer } = obj[0];
-  const { description, name, pictures } = destination;
+  const { destinationData, offer } = obj[0];
+  const { distanation, city} = destinationData[0];
 
   return `<li class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
@@ -98,9 +97,9 @@ export const createSiteAddNewTemplate = (obj) => {
         <label class="event__label  event__type-output" for="event-destination-1">
           Flight
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value=${name} list="destination-list-1">
+        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="" list="destination-list-1">
         <datalist id="destination-list-1">
-          <option value="Amsterdam"></option>
+          <option value=${city}></option>
           <option value="Geneva"></option>
           <option value="Chamonix"></option>
         </datalist>
@@ -129,9 +128,9 @@ export const createSiteAddNewTemplate = (obj) => {
     ${createOffersemplate(offer)}
       <section class="event__section  event__section--destination">
         <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-        <p class="event__destination-description">${description}</p>
+        <p class="event__destination-description">${distanation.description}</p>
 
-        ${createImgTemplate(pictures)}
+        ${createImgTemplate(distanation.pictures)}
         </div>
       </section>
     </section>
