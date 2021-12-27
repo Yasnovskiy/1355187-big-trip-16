@@ -1,13 +1,11 @@
-import {getRandomInteger, typeName, getRandomElements, generateDate} from './mockData.js';
+import {getRandomInteger, typeName, generateDate} from './mockData.js';
 import {offersData} from './offers.js';
 
 const generatePoint = (array) => {
-  const generatePhotoId = getRandomElements(array);
-
-  const arrayValue = [];
+  const arrayPoint = [];
 
   for (let i = 0; i < array.length; i++) {
-    arrayValue[i] = {
+    arrayPoint[i] = {
       basePrice: getRandomInteger(40, 250),
       dateFrom: generateDate('from'),
       dateTo: generateDate('to'),
@@ -18,7 +16,7 @@ const generatePoint = (array) => {
     };
   }
 
-  return arrayValue;
+  return arrayPoint;
 };
 
 

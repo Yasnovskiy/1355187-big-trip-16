@@ -16,23 +16,18 @@ const dataFormater = (value, type) => {
   return data;
 };
 
-const fsfs = (obj) => {
-  // const {type, offers} = obj;
-
-  console.log(obj);
-
-  return ` ${obj.length > 0 ? `  <h4 class="visually-hidden">Offers:</h4>
-  <ul class="event__selected-offers">
-    ${obj.map(({id, description, price}) => `
-      <li id=${id} class="event__offer">
-    <span class="event__offer-title">${description}</span>
-    &plus;&euro;&nbsp;
-    <span class="event__offer-price">${price}</span>
-  </li>
+const createOffers = (obj) => (
+  ` ${obj.length > 0 ? `  <h4 class="visually-hidden">Offers:</h4>
+      <ul class="event__selected-offers">
+      ${obj.map(({id, description, price}) => `
+        <li id=${id} class="event__offer">
+         <span class="event__offer-title">${description}</span>
+           &plus;&euro;&nbsp;
+          <span class="event__offer-price">${price}</span>
+       </li>
    `).join('')}
-   </ul>` : ''}`;
-
-};
+   </ul>` : ''}`
+);
 
 export const createSiteEventTemplate = (obj) => {
   const {basePrice, dateFrom, dateTo, id, isFavorite, offers, type} = obj;
@@ -57,7 +52,7 @@ export const createSiteEventTemplate = (obj) => {
     <p class="event__price">
       &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
     </p>
-        ${fsfs(offers)}
+        ${createOffers(offers)}
     <button class="event__favorite-btn ${classActive}" type="button">
       <span class="visually-hidden">Add to favorite</span>
       <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">

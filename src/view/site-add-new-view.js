@@ -1,31 +1,29 @@
-const createImgTemplate = (obj) => {
-  console.log();
+const createImgTemplate = (obj) => (
+  ` ${obj.length > 0 ? `
+  <div class="event__photos-container">
+    <div class="event__photos-tape">
+      ${obj.map(({src, description}) => `
+        <img class="event__photo" src=${src} alt=${description}>
+      `).join('')}
+    </div>` : ''}`
+);
 
-  return ` ${obj.length > 0 ? `<div class="event__photos-container">
-  <div class="event__photos-tape">
-    ${obj.map(({src, description}) => `
-      <img class="event__photo" src=${src} alt=${description}>
-   `).join('')}
-    </div>` : ''}`;
-};
 
-
-const createOffersemplate = (obj) => {
-  console.log();
-
-  return ` ${obj[0].offers.length > 0 ? `<section class="event__section  event__section--offers">
-  <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-  <div class="event__available-offers">
-    ${obj[0].offers.map(({id, description, price}) => `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${id}" type="checkbox" name="event-offer-luggage" checked>
-      <label class="event__offer-label" for="event-offer-luggage-${id}">
-        <span class="event__offer-title">${description}</span>
-        &plus;&euro;&nbsp;
-        <span class="event__offer-price">${price} </span>
-      </label>
-    </div>`).join('')}
-    </section>`: ''}`;
-};
+const createOffersemplate = (obj) => (
+  ` ${obj[0].offers.length > 0 ? `
+    <section class="event__section  event__section--offers">
+      <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+      <div class="event__available-offers">
+        ${obj[0].offers.map(({id, description, price}) => `<div class="event__offer-selector">
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${id}" type="checkbox" name="event-offer-luggage" checked>
+        <label class="event__offer-label" for="event-offer-luggage-${id}">
+          <span class="event__offer-title">${description}</span>
+            &plus;&euro;&nbsp;
+          <span class="event__offer-price">${price} </span>
+        </label>
+      </div>`).join('')}
+    </section>`: ''}`
+);
 
 export const createSiteAddNewTemplate = (obj) => {
   const { destinationData, offer } = obj[0];
