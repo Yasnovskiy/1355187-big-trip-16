@@ -1,3 +1,5 @@
+import {createElement} from '../render.js';
+
 const createImgTemplate = (obj) => (
   ` ${obj.length > 0 ? `
   <div class="event__photos-container">
@@ -25,11 +27,11 @@ const createOffersemplate = (obj) => (
     </section>`: ''}`
 );
 
-export const createSiteAddNewTemplate = (obj) => {
+const createSiteAddNewTripTemplate = (obj) => {
   const { destinationData, offer } = obj[0];
   const { distanation, city} = destinationData[0];
 
-  return `<li class="trip-events__item">
+  return `<li class="trip-events__item trip-events__item--new">
   <form class="event event--edit" action="#" method="post">
     <header class="event__header">
       <div class="event__type-wrapper">
@@ -135,3 +137,28 @@ export const createSiteAddNewTemplate = (obj) => {
   </form>
 </li>`;
 };
+
+export default class SiteAddNewTripView {
+  #element = null;
+  #data = null;
+
+  constructor(task) {
+    this.#data = task;
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get template() {
+    return createSiteAddNewTripTemplate(this.#data);
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}

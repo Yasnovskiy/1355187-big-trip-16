@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import {createElement} from '../render.js';
 
 const dataFormater = (value, type) => {
   let data = '';
@@ -29,7 +30,7 @@ const createOffers = (obj) => (
    </ul>` : ''}`
 );
 
-export const createSiteEventTemplate = (obj) => {
+const createSiteEventTemplate = (obj) => {
   const {basePrice, dateFrom, dateTo, id, isFavorite, offers, type} = obj;
 
   const classActive = isFavorite ? 'event__favorite-btn--active': '';
@@ -65,3 +66,28 @@ export const createSiteEventTemplate = (obj) => {
   </div>
 </li>`;
 };
+
+export default class SiteEventView {
+  #element = null;
+  #data = null;
+
+  constructor(task) {
+    this.#data = task;
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get template() {
+    return createSiteEventTemplate(this.#data);
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}
