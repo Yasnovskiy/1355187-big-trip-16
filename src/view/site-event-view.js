@@ -1,24 +1,8 @@
-import dayjs from 'dayjs';
 import {createElement} from '../render.js';
-
-const dataFormater = (value, type) => {
-  let data = '';
-
-  if (type === 'MD') {
-    data = dayjs(value).format('MMM D');
-  } else if (type === 'YMD') {
-    data = dayjs(value).format('YYYY-MM-DD');
-  } else if (type === 'YMDH') {
-    data = dayjs(value).format('YYYY-MM-DD HH:mm');
-  } else if (type === 'Hm') {
-    data= dayjs(value).format('HH:mm');
-  }
-
-  return data;
-};
+import {dataFormater} from '../mock/mockData';
 
 const createOffers = (obj) => (
-  ` ${obj.length > 0 ? `  <h4 class="visually-hidden">Offers:</h4>
+  ` ${obj.length > 0 ? `<h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
       ${obj.map(({id, description, price}) => `
         <li id=${id} class="event__offer">

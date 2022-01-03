@@ -1,5 +1,8 @@
 import {getRandomInteger, typeName, generateDate} from './mockData.js';
 import {offersData} from './offers.js';
+import {generateMockData} from './trip.js';
+
+const newDestination = Array.from({length: typeName.length}, generateMockData);
 
 const generatePoint = (array) => {
   const arrayPoint = [];
@@ -13,6 +16,7 @@ const generatePoint = (array) => {
       isFavorite: getRandomInteger(),
       offers: offersData[i].offers,
       type: `${offersData[i].type}`,
+      destinationDatas: newDestination[i].destinationData,
     };
   }
 

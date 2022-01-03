@@ -77,3 +77,19 @@ export const generateDate = (date) => {
 
   return dayjs().add(daysGap, 'hour').toDate();
 };
+
+export const dataFormater = (value, type) => {
+  let data = '';
+
+  if (type === 'MD') {
+    data = dayjs(value).format('MMM D');
+  } else if (type === 'YMD') {
+    data = dayjs(value).format('YYYY-MM-DD');
+  } else if (type === 'YMDH') {
+    data = dayjs(value).format('YYYY-MM-DD HH:mm');
+  } else if (type === 'Hm') {
+    data= dayjs(value).format('HH:mm');
+  }
+
+  return data;
+};
