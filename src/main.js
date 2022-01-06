@@ -6,7 +6,7 @@ import SiteAddNewTripView from './view/site-add-new-view.js';
 import SiteEventView from './view/site-event-view.js';
 import SiteEventsListView from './view/site-events-list-view.js';
 
-import {render, RenderPosition} from './render.js';
+import {render, replace, RenderPosition} from './utils/render.js';
 // import {generateMockData} from './mock/trip.js';
 import {arrayPoints} from './mock/point.js';
 
@@ -22,41 +22,45 @@ const renderTrip = (taskListElement, task) => {
   const taskEditComponent = new SiteAddNewTripView(task);
 
   const replaceTripToForm = () => {
-    taskListElement.replaceChild(taskEditComponent.element, taskComponent.element);
+    replace(taskEditComponent, taskComponent);
   };
 
   const replaceFormToTrip = () => {
-    taskListElement.replaceChild(taskComponent.element, taskEditComponent.element);
+    replace(taskComponent, taskEditComponent);
   };
 
-  taskComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+  const onEscKeyDown = (evt) => {
+    if (evt.key === 'Escape' || evt.key === 'Esc') {
+      evt.preventDefault();
+      replaceFormToTrip();
+      document.removeEventListener('keydown', onEscKeyDown);
+    }
+  };
+
+  taskComponent.setFormOpenClickHandler(() => {
     replaceTripToForm();
+    document.addEventListener('keydown', onEscKeyDown);
   });
 
-  taskEditComponent.element.querySelector('form').addEventListener('submit', (evt) => {
-    evt.preventDefault();
+  taskEditComponent.setFormCloseClickHandler(() => {
     replaceFormToTrip();
+    document.removeEventListener('keydown', onEscKeyDown);
   });
 
-  taskEditComponent.element.querySelector('.event__reset-btn').addEventListener('click', () => {
-    replaceFormToTrip();
-  });
-
-  render(taskListElement, taskComponent.element, RenderPosition.BEFOREEND);
+  render(taskListElement, taskComponent, RenderPosition.BEFOREEND);
 };
 
-render(siteTripMainElement, new SiteTripInfoView().element, RenderPosition.AFTERBEGIN);
-render(siteNavigationElement, new SiteMenuView().element, RenderPosition.BEFOREEND);
-render(siteFilterElement, new SiteFilterView().element, RenderPosition.BEFOREEND);
+render(siteTripMainElement, new SiteTripInfoView(), RenderPosition.AFTERBEGIN);
+render(siteNavigationElement, new SiteMenuView(), RenderPosition.BEFOREEND);
+render(siteFilterElement, new SiteFilterView(), RenderPosition.BEFOREEND);
 
 const eventsListComponent = new SiteEventsListView();
 
-render(siteMain, eventsListComponent.element, RenderPosition.BEFOREEND);
-render(eventsListComponent.element, new SiteSortView().element, RenderPosition.BEFOREBEGIN);
-
+render(siteMain, eventsListComponent, RenderPosition.BEFOREEND);
+render(eventsListComponent, new SiteSortView(), RenderPosition.BEFOREBEGIN);
 
 for (let i = 0; i < arrayPoints.length; i++) {
-  renderTrip(eventsListComponent.element, arrayPoints[i]);
+  renderTrip(eventsListComponent, arrayPoints[i]);
 }
 
 const buttonNewEvent = document.querySelector('.trip-main__event-add-btn');
@@ -64,7 +68,7 @@ const buttonNewEvent = document.querySelector('.trip-main__event-add-btn');
 buttonNewEvent.addEventListener('click', () => {
   if (!buttonNewEvent.classList.contains('example')) {
     buttonNewEvent.classList.add('example');
-    render(eventsListComponent.element, new SiteAddNewTripView(arrayPoints[0]).element, RenderPosition.AFTERBEGIN);
+    render(eventsListComponent, new SiteAddNewTripView(arrayPoints[0]), RenderPosition.AFTERBEGIN);
   } else {
     const newFormElement = document.querySelector('.trip-events__item--new');
 
