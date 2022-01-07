@@ -1,23 +1,8 @@
-import dayjs from 'dayjs';
-
-const dataFormater = (value, type) => {
-  let data = '';
-
-  if (type === 'MD') {
-    data = dayjs(value).format('MMM D');
-  } else if (type === 'YMD') {
-    data = dayjs(value).format('YYYY-MM-DD');
-  } else if (type === 'YMDH') {
-    data = dayjs(value).format('YYYY-MM-DD HH:mm');
-  } else if (type === 'Hm') {
-    data= dayjs(value).format('HH:mm');
-  }
-
-  return data;
-};
+import {createElement} from '../render.js';
+import {dataFormater} from '../mock/mockData';
 
 const createOffers = (obj) => (
-  ` ${obj.length > 0 ? `  <h4 class="visually-hidden">Offers:</h4>
+  ` ${obj.length > 0 ? `<h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
       ${obj.map(({id, description, price}) => `
         <li id=${id} class="event__offer">
@@ -29,7 +14,7 @@ const createOffers = (obj) => (
    </ul>` : ''}`
 );
 
-export const createSiteEventTemplate = (obj) => {
+const createSiteEventTemplate = (obj) => {
   const {basePrice, dateFrom, dateTo, id, isFavorite, offers, type} = obj;
 
   const classActive = isFavorite ? 'event__favorite-btn--active': '';
@@ -65,3 +50,28 @@ export const createSiteEventTemplate = (obj) => {
   </div>
 </li>`;
 };
+
+export default class SiteEventView {
+  #element = null;
+  #data = null;
+
+  constructor(task) {
+    this.#data = task;
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get template() {
+    return createSiteEventTemplate(this.#data);
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}
