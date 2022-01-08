@@ -1,4 +1,5 @@
 import {getRandomInteger, typeName, generateDate} from './mockData.js';
+import {nanoid} from 'nanoid';
 import {offersData} from './offers.js';
 import {generateMockData} from './trip.js';
 
@@ -12,7 +13,7 @@ const generatePoint = (array) => {
       basePrice: getRandomInteger(40, 250),
       dateFrom: generateDate('from'),
       dateTo: generateDate('to'),
-      id: i + 1,
+      id: nanoid(),
       isFavorite: getRandomInteger(),
       offers: offersData[i].offers,
       type: `${offersData[i].type}`,
