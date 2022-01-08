@@ -1,10 +1,9 @@
 import AbstractView from './abstract-view';
-import { sortIdFormEvent } from '../utils/const';
 
 export const createSiteSortTemplate = () => (
   `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
     <div class="trip-sort__item  trip-sort__item--day">
-      <input id="${sortIdFormEvent.DEFAULT}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-day" checked>
+      <input id="sort-day" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-day" checked>
       <label class="trip-sort__btn" for="sort-day">Day</label>
     </div>
 
@@ -14,12 +13,12 @@ export const createSiteSortTemplate = () => (
     </div>
 
     <div class="trip-sort__item  trip-sort__item--time">
-      <input id="${sortIdFormEvent.DATE_TIME}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-time">
+      <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-time">
       <label class="trip-sort__btn" for="sort-time">Time</label>
     </div>
 
     <div class="trip-sort__item  trip-sort__item--price">
-      <input id="${sortIdFormEvent.DATE_PRICE}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-price">
+      <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-price">
       <label class="trip-sort__btn" for="sort-price">Price</label>
     </div>
 
