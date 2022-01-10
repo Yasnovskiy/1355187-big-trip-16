@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from './abstract-view';
 import {dataFormater} from '../mock/mockData';
 
 const createOffers = (obj) => (
@@ -51,27 +51,25 @@ const createSiteEventTemplate = (obj) => {
 </li>`;
 };
 
-export default class SiteEventView {
-  #element = null;
+export default class SiteEventView extends AbstractView {
   #data = null;
 
-  constructor(task) {
-    this.#data = task;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
+  constructor (data) {
+    super();
+    this.#data = data;
   }
 
   get template() {
     return createSiteEventTemplate(this.#data);
   }
 
-  removeElement() {
-    this.#element = null;
+  setFormOpenClickHandler = (callback) => {
+    this._callback.openClick = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#formOpenClickHandler);
+  }
+
+  #formOpenClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.openClick();
   }
 }

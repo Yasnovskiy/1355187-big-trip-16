@@ -1,4 +1,4 @@
-import {createElement} from '../render.js';
+import AbstractView from './abstract-view';
 import {dataFormater} from '../mock/mockData';
 import {typeName} from '../mock/mockData';
 
@@ -105,27 +105,26 @@ const createSiteAddNewTripTemplate = (obj) => {
 </li>`;
 };
 
-export default class SiteAddNewTripView {
-  #element = null;
+export default class SiteAddNewTripView extends AbstractView {
   #data = null;
 
-  constructor(task) {
-    this.#data = task;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
+  constructor (data) {
+    super();
+    this.#data = data;
   }
 
   get template() {
     return createSiteAddNewTripTemplate(this.#data);
   }
 
-  removeElement() {
-    this.#element = null;
+  setFormCloseClickHandler = (callback) => {
+    this._callback.openClick = callback;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formCloseClickHandler);
+    this.element.querySelector('form').addEventListener('submit', this.#formCloseClickHandler);
+  }
+
+  #formCloseClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.openClick();
   }
 }
