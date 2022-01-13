@@ -125,6 +125,6 @@ export default class SiteAddNewTripView extends AbstractView {
 
   #formCloseClickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.openClick();
+    this._callback.openClick(this.#data);
   }
 }
