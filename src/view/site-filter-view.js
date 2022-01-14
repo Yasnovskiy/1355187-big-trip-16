@@ -25,5 +25,17 @@ export default class SiteFilterView extends AbstractView {
   get template() {
     return createSiteFilterTemplate();
   }
+
+  setFilterPointChangeHandler = (callback) => {
+    this._callback.filterPointChange = callback;
+    this.element.addEventListener('click', this.#filterPointChangeHandler);
+  }
+
+  #filterPointChangeHandler = (evt) => {
+    if (evt.target.tagName === 'INPUT') {
+      this._callback.filterPointChange(evt.target.id);
+    }
+  }
+
 }
 
