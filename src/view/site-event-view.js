@@ -15,7 +15,7 @@ const createOffers = (obj) => (
 );
 
 const createSiteEventTemplate = (obj) => {
-  const {basePrice, dateFrom, dateTo, id, isFavorite, offers, type} = obj;
+  const {basePrice, dateFrom, dateTo, id, isFavorite, offers, city, type} = obj;
 
   const classActive = isFavorite ? 'event__favorite-btn--active': '';
 
@@ -25,7 +25,7 @@ const createSiteEventTemplate = (obj) => {
     <div class="event__type">
       <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
     </div>
-    <h3 class="event__title">${type} Amsterdam</h3>
+    <h3 class="event__title">${type} ${city}</h3>
     <div class="event__schedule">
       <p class="event__time">
         <time class="event__start-time" datetime=${dataFormater(dateFrom, 'YMDH')}>${dataFormater(dateFrom, 'Hm')}</time>
@@ -82,4 +82,6 @@ export default class SiteEventView extends AbstractView {
     evt.preventDefault();
     this._callback.openClick();
   }
+
+
 }
