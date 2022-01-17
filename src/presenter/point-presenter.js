@@ -42,8 +42,6 @@ export default class PointerPresenter {
       return;
     }
 
-    // Проверка на наличие в DOM необходима,
-    // чтобы не пытаться заменить то, что не было отрисовано
     if (this.#mode === Mode.DEFAULT) {
       replace(this.#pointComponent, prevTaskComponent);
     }
@@ -63,6 +61,7 @@ export default class PointerPresenter {
 
   resetView = () => {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#pointEditComponent.reset(this.#point);
       this.#replaceFormToTrip();
     }
   }
@@ -83,6 +82,7 @@ export default class PointerPresenter {
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
+      this.#pointEditComponent.reset(this.#point);
       this.#replaceFormToTrip();
     }
   }
@@ -92,6 +92,7 @@ export default class PointerPresenter {
   }
 
   #handleFormSubmit = () => {
+    this.#pointEditComponent.reset(this.#point);
     this.#replaceFormToTrip();
   }
 

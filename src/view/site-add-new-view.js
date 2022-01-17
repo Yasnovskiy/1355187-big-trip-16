@@ -1,9 +1,13 @@
-import AbstractView from './abstract-view';
+import SmartView from './smart-view';
 import {dataFormater} from '../mock/mockData';
 import {typeName} from '../mock/mockData';
+import flatpickr from 'flatpickr';
+import { Russian } from 'flatpickr/dist/l10n/ru.js';
+
+import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 const createImgTemplate = (obj) => (
-  ` ${obj.length > 0 ? `
+  `${obj ? `
   <div class="event__photos-container">
     <div class="event__photos-tape">
       ${obj.map(({src, description}) => `
@@ -14,12 +18,11 @@ const createImgTemplate = (obj) => (
 
 const createTypeItemTemplate = (array, type) => (
   ` ${array.length > 0 ? `
-    <div class="event__type-item">
-      ${array.map((item) => `
-        <input id="event-type-${item}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${item}" ${item === type ? 'checked': ''}>
-        <label class="event__type-label  event__type-label--${item}" for="event-type-${item}-1">${item}</label>
-      `).join('')}
-    </div>` : ''}`
+        ${array.map((item) => `
+        <div class="event__type-item">
+          <input id="event-type-${item}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${item}" ${item === type ? 'checked': ''}>
+          <label class="event__type-label  event__type-label--${item}" for="event-type-${item}-1">${item}</label>
+        </div>`).join('')}` : ''}`
 );
 
 
@@ -33,15 +36,25 @@ const createOffersemplate = (obj) => (
         <label class="event__offer-label" for="event-offer-luggage-${id}">
           <span class="event__offer-title">${description}</span>
             &plus;&euro;&nbsp;
-          <span class="event__offer-price">${price} </span>
+          <span class="event__offer-price">${price}</span>
         </label>
       </div>`).join('')}
     </section>`: ''}`
 );
 
+const createOptionTemplate = (obj) => (
+  ` ${obj? `
+        ${obj.map((item) => `
+        <option value=${item.city}></option>
+        `).join('')}` : ''}`
+);
+
 const createSiteAddNewTripTemplate = (obj) => {
-  const { basePrice, dateFrom, dateTo, destinationDatas, offers, type} = obj;
-  const { distanation, city} = destinationDatas[0];
+  const { basePrice, dateFrom, dateTo, destinationDatas, offersArray, city, type} = obj;
+
+  const selectedType = offersArray.find((item) => item.type === type);
+
+  const selectedCity = destinationDatas.find((item) => item.city === city) || { distanation: {} };
 
   return `<li class="trip-events__item trip-events__item--new">
   <form class="event event--edit" action="#" method="post">
@@ -65,11 +78,9 @@ const createSiteAddNewTripTemplate = (obj) => {
         <label class="event__label  event__type-output" for="event-destination-1">
           ${type}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="" list="destination-list-1">
-        <datalist id="destination-list-1">
-          <option value=${city}></option>
-          <option value="Geneva"></option>
-          <option value="Chamonix"></option>
+        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value=${selectedCity.city} list="destination-list-1">
+       <datalist id="destination-list-1">
+       ${createOptionTemplate(destinationDatas)}
         </datalist>
       </div>
 
@@ -93,11 +104,11 @@ const createSiteAddNewTripTemplate = (obj) => {
       <button class="event__reset-btn" type="reset">Cancel</button>
     </header>
     <section class="event__details">
-    ${createOffersemplate(offers)}
+    ${createOffersemplate(selectedType.offers)}
       <section class="event__section  event__section--destination">
         <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-        <p class="event__destination-description">${distanation.description}</p>
-        ${createImgTemplate(distanation.pictures)}
+        <p class="event__destination-description">${selectedCity.distanation.description}</p>
+        ${createImgTemplate(selectedCity.distanation.pictures)}
         </div>
       </section>
     </section>
@@ -105,26 +116,127 @@ const createSiteAddNewTripTemplate = (obj) => {
 </li>`;
 };
 
-export default class SiteAddNewTripView extends AbstractView {
-  #data = null;
+export default class SiteAddNewTripView extends SmartView {
+  #dateStartPicker = null;
+  #dataEndPicker = null;
 
-  constructor (data) {
+  constructor (point) {
     super();
-    this.#data = data;
+    this._data = SiteAddNewTripView.parseDataToTask(point);
+
+    this.#setInnerHandlers();
+    this.#setDatepicker();
   }
 
   get template() {
-    return createSiteAddNewTripTemplate(this.#data);
+    return createSiteAddNewTripTemplate(this._data);
+  }
+
+  // Перегружаем метод родителя removeElement,
+  // чтобы при удалении удалялся более не нужный календарь
+  removeElement = () => {
+    super.removeElement();
+
+    if (this.#dateStartPicker) {
+      this.#dateStartPicker.destroy();
+      this.#dateStartPicker = null;
+    }
+
+    if (this.#dataEndPicker) {
+      this.#dataEndPicker.destroy();
+      this.#dataEndPicker = null;
+    }
+  }
+
+  reset = (point) => {
+    this.updateData(
+      SiteAddNewTripView.parseDataToTask(point),
+    );
+  }
+
+  restoreHandlers = () => {
+    this.#setInnerHandlers();
+    this.#setDatepicker();
+    this.setFormCloseClickHandler(this._callback.openClick);
   }
 
   setFormCloseClickHandler = (callback) => {
     this._callback.openClick = callback;
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formCloseClickHandler);
     this.element.querySelector('form').addEventListener('submit', this.#formCloseClickHandler);
+  }
+
+  #setDatepicker = () => {
+    // flatpickr есть смысл инициализировать только в случае,
+    // если поле выбора даты доступно для заполнения
+    this.#dateStartPicker = flatpickr(
+      this.element.querySelector('input[name="event-start-time"]'),
+      {
+        locale: Russian,
+        enableTime: true,
+        dateFormat: 'Y-m-d H:i',
+        defaultDate: this._data.dateFrom,
+        onChange: this.#dueDateStartChangeHandler,
+      },
+    );
+
+
+    this.#dataEndPicker = flatpickr(
+      this.element.querySelector('input[name="event-end-time"]'),
+      {
+        locale: Russian,
+        enableTime: true,
+        dateFormat: 'Y-m-d H:i',
+        defaultDate: this._data.dateTo,
+        onChange: this.#dueDateEndChangeHandler,
+      },
+    );
+
+
+  }
+
+  #setInnerHandlers = () => {
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formCloseClickHandler);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#cityChangeHandler);
+  }
+
+  #dueDateStartChangeHandler = ([userDate]) => {
+    this.updateData({
+      dateFrom: userDate,
+    });
+  }
+
+  #dueDateEndChangeHandler = ([userDate]) => {
+    this.updateData({
+      dateTo: userDate,
+    });
+  }
+
+
+  #typeChangeHandler = (evt) => {
+    if (evt.target.tagName === 'INPUT') {
+
+      this.updateData({
+        type: evt.target.value,
+      });
+    }
+  }
+
+  #cityChangeHandler = (evt) => {
+    this.updateData({
+      city: evt.target.value,
+    });
   }
 
   #formCloseClickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.openClick(this.#data);
+    this._callback.openClick(SiteAddNewTripView.parseDataToTask(this._data));
   }
+
+  static parseDataToTask = (data) => {
+    const point = {...data};
+
+    return point;
+  }
+
 }

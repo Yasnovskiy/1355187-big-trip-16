@@ -1,7 +1,3 @@
-import SiteTripInfoView from './view/site-trip-info-view.js';
-import SiteMenuView from './view/site-menu-view.js';
-import SiteFilterView from './view/site-filter-view.js';
-
 import SiteAddNewTripView from './view/site-add-new-view.js';
 import SiteEventsListView from './view/site-events-list-view.js';
 
@@ -12,19 +8,13 @@ import {arrayPoints} from './mock/point.js';
 
 import TripPresenter from './presenter/trip-presenter';
 
-
 const siteTripMain = document.querySelector('.trip-main');
 const siteNavigationElement = siteTripMain.querySelector('.trip-controls__navigation');
 const siteFilterElement = siteTripMain.querySelector('.trip-controls__filters');
 
 const siteMainTripEvents = document.querySelector('.trip-events');
 
-render(siteTripMain, new SiteTripInfoView(), RenderPosition.AFTERBEGIN);
-render(siteNavigationElement, new SiteMenuView(), RenderPosition.BEFOREEND);
-render(siteFilterElement, new SiteFilterView(), RenderPosition.BEFOREEND);
-
-
-const boardPresenter = new TripPresenter(siteMainTripEvents);
+const boardPresenter = new TripPresenter(siteTripMain, siteNavigationElement, siteFilterElement, siteMainTripEvents);
 boardPresenter.init(arrayPoints);
 
 const eventsListComponent = new SiteEventsListView();
