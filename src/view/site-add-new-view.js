@@ -6,6 +6,28 @@ import { Russian } from 'flatpickr/dist/l10n/ru.js';
 
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
+const BLANK_POINT = {
+  basePrice: 0,
+  city: 'Мадрид',
+  dateFrom: null,
+  dateTo: null,
+  destinationDatas: [
+    {
+      city: 'Мадрид',
+      distanation: [],
+    },
+  ],
+  id: '15243',
+  offers: [],
+  offersArray: [
+    {
+      type: 'flight',
+      offers: [],
+    }
+  ],
+  type: 'flight',
+};
+
 const createImgTemplate = (obj) => (
   `${obj ? `
   <div class="event__photos-container">
@@ -27,7 +49,7 @@ const createTypeItemTemplate = (array, type) => (
 
 
 const createOffersemplate = (obj) => (
-  ` ${obj.length > 0 ? `
+  ` ${obj.length > 0 || undefined ? `
     <section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
@@ -44,15 +66,21 @@ const createOffersemplate = (obj) => (
 
 const createOptionTemplate = (obj) => (
   ` ${obj? `
-        ${obj.map((item) => `
+      ${obj.map((item) => `
         <option value=${item.city}></option>
-        `).join('')}` : ''}`
+      `).join('')}` : ''}`
 );
 
-const createSiteAddNewTripTemplate = (obj) => {
-  const { basePrice, dateFrom, dateTo, destinationDatas, offersArray, city, type} = obj;
+const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
+  const dfsdf = currentFilter ?
+    `<button class="event__reset-btn" type="reset">Delete</button>
+      <button class="event__rollup-btn" type="button">
+        <span class="visually-hidden">Open event</span>
+      </button>`: '<button class="event__reset-btn" type="reset">Cancel</button>';
 
-  const selectedType = offersArray.find((item) => item.type === type);
+  const { basePrice, dateFrom, dateTo, destinationDatas = [], offersArray = [{ type: 'bus', offers: [] }], city, type} = obj;
+
+  const selectedType = offersArray.find((item) => item.type === type) || {offers : {}};
 
   const selectedCity = destinationDatas.find((item) => item.city === city) || { distanation: {} };
 
@@ -78,7 +106,7 @@ const createSiteAddNewTripTemplate = (obj) => {
         <label class="event__label  event__type-output" for="event-destination-1">
           ${type}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value=${selectedCity.city} list="destination-list-1">
+        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value=${selectedCity.city === undefined ? 'Выберите город' : selectedCity.city} list="destination-list-1">
        <datalist id="destination-list-1">
        ${createOptionTemplate(destinationDatas)}
         </datalist>
@@ -97,11 +125,10 @@ const createSiteAddNewTripTemplate = (obj) => {
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value=${basePrice}>
+        <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value=${basePrice}>
       </div>
-
       <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-      <button class="event__reset-btn" type="reset">Cancel</button>
+        ${dfsdf}
     </header>
     <section class="event__details">
     ${createOffersemplate(selectedType.offers)}
@@ -120,8 +147,11 @@ export default class SiteAddNewTripView extends SmartView {
   #dateStartPicker = null;
   #dataEndPicker = null;
 
-  constructor (point) {
+  #currentFilter = null;
+
+  constructor (point = BLANK_POINT, currentFilter) {
     super();
+    this.#currentFilter = currentFilter;
     this._data = SiteAddNewTripView.parseDataToTask(point);
 
     this.#setInnerHandlers();
@@ -129,11 +159,9 @@ export default class SiteAddNewTripView extends SmartView {
   }
 
   get template() {
-    return createSiteAddNewTripTemplate(this._data);
+    return createSiteAddNewTripTemplate(this._data, this.#currentFilter);
   }
 
-  // Перегружаем метод родителя removeElement,
-  // чтобы при удалении удалялся более не нужный календарь
   removeElement = () => {
     super.removeElement();
 
@@ -158,16 +186,46 @@ export default class SiteAddNewTripView extends SmartView {
     this.#setInnerHandlers();
     this.#setDatepicker();
     this.setFormCloseClickHandler(this._callback.openClick);
+    this.setFormOpenClickHandler(this._callback.closeClick);
+    this.setDeleteClickHandler(this._callback.deleteClick);
   }
 
   setFormCloseClickHandler = (callback) => {
     this._callback.openClick = callback;
-    this.element.querySelector('form').addEventListener('submit', this.#formCloseClickHandler);
+    this.element.querySelector('form').addEventListener('submit', this.#formSendClickHandler);
+  }
+
+  setDeleteClickHandler = (callback) => {
+    this._callback.deleteClick = callback;
+
+    // if (this.element.querySelector('.event__rollup-btn')) {
+
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteClickHandler);
+    // }
+    // this.element.querySelector('.event__input--destination').addEventListener('change', this.#formDeleteClickHandler);
+  }
+
+  setFormOpenClickHandler = (callback) => {
+    this._callback.closeClick = callback;
+    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formOpenClickHandler);
+
+    if (this.element.querySelector('.event__rollup-btn')) {
+      this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#formOpenClickHandler);
+    }
+  }
+
+  #formOpenClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.closeClick();
+  }
+
+  #formDeleteClickHandler = (evt) => {
+    evt.preventDefault();
+
+    this._callback.deleteClick(SiteAddNewTripView.parseDataToTask(this._data));
   }
 
   #setDatepicker = () => {
-    // flatpickr есть смысл инициализировать только в случае,
-    // если поле выбора даты доступно для заполнения
     this.#dateStartPicker = flatpickr(
       this.element.querySelector('input[name="event-start-time"]'),
       {
@@ -195,7 +253,6 @@ export default class SiteAddNewTripView extends SmartView {
   }
 
   #setInnerHandlers = () => {
-    this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formCloseClickHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#cityChangeHandler);
   }
@@ -226,6 +283,11 @@ export default class SiteAddNewTripView extends SmartView {
     this.updateData({
       city: evt.target.value,
     });
+  }
+
+  #formSendClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.openClick(SiteAddNewTripView.parseDataToTask(this._data));
   }
 
   #formCloseClickHandler = (evt) => {

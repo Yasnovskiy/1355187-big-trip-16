@@ -1,37 +1,47 @@
 import AbstractView from './abstract-view';
+import { sortIdFormEvent } from '../utils/const';
 
-export const createSiteSortTemplate = () => (
+const createSiteSortTemplate = (currentSoryType) => (
   `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
-    <div class="trip-sort__item  trip-sort__item--day">
-      <input id="sort-day" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-day" checked>
-      <label class="trip-sort__btn" for="sort-day">Day</label>
+
+    <div class="trip-sort__item  trip-sort__item--day ${currentSoryType === sortIdFormEvent.DEFAULT ? 'trip-sort__item--active' : ''}">
+      <input id="${sortIdFormEvent.DEFAULT}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="${sortIdFormEvent.DEFAULT}" ${currentSoryType === sortIdFormEvent.DEFAULT ? 'checked' : ''}>
+      <label class="trip-sort__btn" for="${sortIdFormEvent.DEFAULT}">Day</label>
     </div>
 
     <div class="trip-sort__item  trip-sort__item--event">
-      <input id="sort-event" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-event" disabled>
-      <label class="trip-sort__btn" for="sort-event">Event</label>
+      <input id="${sortIdFormEvent.DATE_EVENT}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="${sortIdFormEvent.DATE_EVENT}" disabled>
+      <label class="trip-sort__btn" for="${sortIdFormEvent.DATE_EVENT}">Event</label>
     </div>
 
-    <div class="trip-sort__item  trip-sort__item--time">
-      <input id="sort-time" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-time">
-      <label class="trip-sort__btn" for="sort-time">Time</label>
+    <div class="trip-sort__item  trip-sort__item--time ${currentSoryType === sortIdFormEvent.DATE_TIME ? 'trip-sort__item--active' : ''}">
+      <input id="${sortIdFormEvent.DATE_TIME}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="${sortIdFormEvent.DATE_TIME}" ${currentSoryType === sortIdFormEvent.DATE_TIME ? 'checked' : ''}>
+      <label class="trip-sort__btn" for="${sortIdFormEvent.DATE_TIME}">Time</label>
     </div>
 
-    <div class="trip-sort__item  trip-sort__item--price">
-      <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-price">
-      <label class="trip-sort__btn" for="sort-price">Price</label>
+    <div class="trip-sort__item  trip-sort__item--price ${currentSoryType === sortIdFormEvent.DATE_PRICE ? 'trip-sort__item--active' : ''}">
+      <input id="${sortIdFormEvent.DATE_PRICE}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="${sortIdFormEvent.DATE_PRICE}" ${currentSoryType === sortIdFormEvent.DATE_PRICE ? 'checked' : ''}>
+      <label class="trip-sort__btn" for="${sortIdFormEvent.DATE_PRICE}">Price</label>
     </div>
 
     <div class="trip-sort__item  trip-sort__item--offer">
-      <input id="sort-offer" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-offer" disabled>
-      <label class="trip-sort__btn" for="sort-offer">Offers</label>
+      <input id="${sortIdFormEvent.DATE_OFFER}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="${sortIdFormEvent.DATE_OFFER}" disabled>
+      <label class="trip-sort__btn" for="${sortIdFormEvent.DATE_OFFER}">Offers</label>
     </div>
+
   </form>`
 );
 
 export default class SiteSortView extends AbstractView {
+  #currentSoryType = null;
+
+  constructor(currentSoryType) {
+    super();
+    this.#currentSoryType = currentSoryType;
+  }
+
   get template() {
-    return createSiteSortTemplate();
+    return createSiteSortTemplate(this.#currentSoryType);
   }
 
   setSortTypeChangeHandler = (callback) => {

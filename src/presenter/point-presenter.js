@@ -1,6 +1,7 @@
-import SiteEventView from '../view/site-event-view.js';
-import SiteAddNewTripView from '../view/site-add-new-view.js';
-import {render, RenderPosition, replace, remove} from '../utils/render.js';
+import SiteEventView from '../view/site-event-view';
+import SiteAddNewTripView from '../view/site-add-new-view';
+import {render, RenderPosition, replace, remove} from '../utils/render';
+import {UserAction, UpdateType} from '../utils/const';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -31,11 +32,14 @@ export default class PointerPresenter {
     const prevTaskEditComponent = this.#pointEditComponent;
 
     this.#pointComponent = new SiteEventView(point);
-    this.#pointEditComponent = new SiteAddNewTripView(point);
+    this.#pointEditComponent = new SiteAddNewTripView(point, true);
 
     this.#pointComponent.setFormOpenClickHandler(this.#handleEditClick);
-    this.#pointEditComponent.setFormCloseClickHandler(this.#handleFormSubmit);
     this.#pointComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
+
+    this.#pointEditComponent.setFormCloseClickHandler(this.#handleFormSubmit);
+    this.#pointEditComponent.setFormOpenClickHandler(this.#handleCloseFormClick);
+    this.#pointEditComponent.setDeleteClickHandler(this.#handleDeleteClick);
 
     if (prevTaskComponent === null || prevTaskEditComponent === null) {
       render(this.#pointListContainer, this.#pointComponent, RenderPosition.BEFOREEND);
@@ -91,12 +95,34 @@ export default class PointerPresenter {
     this.#replaceTripToForm();
   }
 
-  #handleFormSubmit = () => {
+  #handleCloseFormClick = () => {
     this.#pointEditComponent.reset(this.#point);
     this.#replaceFormToTrip();
   }
 
+  #handleFormSubmit = (newData) => {
+    this.#changeData(
+      UserAction.UPDATE_TASK,
+      UpdateType.MINOR,
+      {...this.#point, ...newData}
+    );
+    this.#replaceFormToTrip();
+
+  }
+
   #handleFavoriteClick = () => {
-    this.#changeData({...this.#point, isFavorite: !this.#point.isFavorite});
+    this.#changeData(
+      UserAction.UPDATE_TASK,
+      UpdateType.MINOR,
+      {...this.#point, isFavorite: !this.#point.isFavorite}
+    );
+  }
+
+  #handleDeleteClick = (task) => {
+    this.#changeData(
+      UserAction.DELETE_TASK,
+      UpdateType.MINOR,
+      task,
+    );
   }
 }
