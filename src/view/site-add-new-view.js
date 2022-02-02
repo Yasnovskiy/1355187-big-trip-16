@@ -1,6 +1,8 @@
 import SmartView from './smart-view';
-import {dataFormater} from '../mock/mockData';
-import {typeName} from '../mock/mockData';
+import {dataFormater} from '../utils/utils';
+
+import { typeName } from '../utils/const.js';
+
 import flatpickr from 'flatpickr';
 import { Russian } from 'flatpickr/dist/l10n/ru.js';
 
@@ -8,23 +10,9 @@ import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 const BLANK_POINT = {
   basePrice: 0,
-  city: 'Мадрид',
   dateFrom: null,
   dateTo: null,
-  destinationDatas: [
-    {
-      city: 'Мадрид',
-      distanation: [],
-    },
-  ],
-  id: '15243',
-  offers: [],
-  offersArray: [
-    {
-      type: 'flight',
-      offers: [],
-    }
-  ],
+  isFavorite: false,
   type: 'flight',
 };
 
@@ -38,11 +26,23 @@ const createImgTemplate = (obj) => (
     </div>` : ''}`
 );
 
-const createTypeItemTemplate = (array, type) => (
+const createDestinationTemplate = (obj) => {
+  const {description, pictures} = obj;
+
+  return `${obj.pictures !== undefined && obj.pictures.length > 0 ? `
+            <section class="event__section  event__section--destination">
+            <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+            <p class="event__destination-description">${description}</p>
+            ${createImgTemplate(pictures)}
+            </div>
+          </section>` : ''}`;
+};
+
+const createTypeItemTemplate = (array, type, isDisabled) => (
   ` ${array.length > 0 ? `
         ${array.map((item) => `
         <div class="event__type-item">
-          <input id="event-type-${item}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${item}" ${item === type ? 'checked': ''}>
+          <input id="event-type-${item}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" ${isDisabled ? 'disabled' : ''} value="${item}" ${item === type ? 'checked': ''}>
           <label class="event__type-label  event__type-label--${item}" for="event-type-${item}-1">${item}</label>
         </div>`).join('')}` : ''}`
 );
@@ -53,10 +53,10 @@ const createOffersemplate = (obj) => (
     <section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-        ${obj.map(({id, description, price}) => `<div class="event__offer-selector">
+        ${obj.map(({id, title, price}) => `<div class="event__offer-selector">
         <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${id}" type="checkbox" name="event-offer-luggage" checked>
         <label class="event__offer-label" for="event-offer-luggage-${id}">
-          <span class="event__offer-title">${description}</span>
+          <span class="event__offer-title">${title}</span>
             &plus;&euro;&nbsp;
           <span class="event__offer-price">${price}</span>
         </label>
@@ -64,27 +64,32 @@ const createOffersemplate = (obj) => (
     </section>`: ''}`
 );
 
+// const createOptionTemplate = (obj) => (
+//   ` ${obj? `
+//       ${obj.map((item) => `
+//         <option value=${item.name}></option>
+//       `).join('')}` : ''}`
+// );
+
 const createOptionTemplate = (obj) => (
-  ` ${obj? `
-      ${obj.map((item) => `
-        <option value=${item.city}></option>
-      `).join('')}` : ''}`
+  `<option value='Город'></option>`
 );
 
 const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
+
+  const { id, basePrice, dateFrom, dateTo, offerArray, destination = [], offers , offersArray = [{ type: 'bus', offers: [] }], type, isDisabled, isSaving, isDeleting} = obj;
+
   const dfsdf = currentFilter ?
-    `<button class="event__reset-btn" type="reset">Delete</button>
+    `<button class="event__reset-btn" type="reset">${isDeleting ? 'Delete...' : 'Delete'}</button>
       <button class="event__rollup-btn" type="button">
         <span class="visually-hidden">Open event</span>
       </button>`: '<button class="event__reset-btn" type="reset">Cancel</button>';
 
-  const { basePrice, dateFrom, dateTo, destinationDatas = [], offersArray = [{ type: 'bus', offers: [] }], city, type} = obj;
+  // const selectedType = offerArray.find((item) => item.type === type) || {offers : {}};
 
-  const selectedType = offersArray.find((item) => item.type === type) || {offers : {}};
+  // const selectedCity = offerArray.find((item) => item.name === city) || { distanation: {} };
 
-  const selectedCity = destinationDatas.find((item) => item.city === city) || { distanation: {} };
-
-  return `<li class="trip-events__item trip-events__item--new">
+  return `<li id=${id} class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
     <header class="event__header">
       <div class="event__type-wrapper">
@@ -97,7 +102,7 @@ const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
         <div class="event__type-list">
           <fieldset class="event__type-group">
             <legend class="visually-hidden">Event type</legend>
-            ${createTypeItemTemplate(typeName, type)}
+            ${createTypeItemTemplate(typeName, type, isDisabled)}
           </fieldset>
         </div>
       </div>
@@ -106,18 +111,18 @@ const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
         <label class="event__label  event__type-output" for="event-destination-1">
           ${type}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value=${selectedCity.city === undefined ? 'Выберите город' : selectedCity.city} list="destination-list-1">
+        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" ${isDisabled ? 'disabled' : ''} value=${destination === undefined ? 'Выберите город' : destination.name} list="destination-list-1">
        <datalist id="destination-list-1">
-       ${createOptionTemplate(destinationDatas)}
+       ${createOptionTemplate(destination)}
         </datalist>
       </div>
 
       <div class="event__field-group  event__field-group--time">
         <label class="visually-hidden" for="event-start-time-1">From</label>
-        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value=${dataFormater(dateFrom, 'YMDH')}>
+        <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" ${isDisabled ? 'disabled' : ''} value=${dataFormater(dateFrom, 'YMDH')}>
         &mdash;
         <label class="visually-hidden" for="event-end-time-1">To</label>
-        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value=${dataFormater(dateTo, 'YMDH')}>
+        <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" ${isDisabled ? 'disabled' : ''} value=${dataFormater(dateTo, 'YMDH')}>
       </div>
 
       <div class="event__field-group  event__field-group--price">
@@ -125,19 +130,14 @@ const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
           <span class="visually-hidden">Price</span>
           &euro;
         </label>
-        <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value=${basePrice}>
+        <input class="event__input  event__input--price" id="event-price-1" type="number" ${isDisabled ? 'disabled' : ''} name="event-price" value=${basePrice}>
       </div>
-      <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+      <button class="event__save-btn  btn  btn--blue" type="submit">${isSaving ? 'Save...' : 'Save'}</button>
         ${dfsdf}
     </header>
     <section class="event__details">
-    ${createOffersemplate(selectedType.offers)}
-      <section class="event__section  event__section--destination">
-        <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-        <p class="event__destination-description">${selectedCity.distanation.description}</p>
-        ${createImgTemplate(selectedCity.distanation.pictures)}
-        </div>
-      </section>
+      ${createOffersemplate(offers)}
+      ${createDestinationTemplate(destination)}
     </section>
   </form>
 </li>`;
@@ -149,11 +149,12 @@ export default class SiteAddNewTripView extends SmartView {
 
   #currentFilter = null;
 
-  constructor (point = BLANK_POINT, currentFilter) {
+  constructor (point = BLANK_POINT, currentFilter, metaData) {
     super();
     this.#currentFilter = currentFilter;
-    this._data = SiteAddNewTripView.parseDataToTask(point);
+    this._data = SiteAddNewTripView.parseTaskToData(point, metaData);
 
+    console.log(metaData);
     this.#setInnerHandlers();
     this.#setDatepicker();
   }
@@ -178,7 +179,7 @@ export default class SiteAddNewTripView extends SmartView {
 
   reset = (point) => {
     this.updateData(
-      SiteAddNewTripView.parseDataToTask(point),
+      SiteAddNewTripView.parseTaskToData(point),
     );
   }
 
@@ -295,8 +296,18 @@ export default class SiteAddNewTripView extends SmartView {
     this._callback.openClick(SiteAddNewTripView.parseDataToTask(this._data));
   }
 
+  static parseTaskToData = (data) => ({...data,
+    isDisabled: false,
+    isSaving: false,
+    isDeleting: false,
+  })
+
   static parseDataToTask = (data) => {
     const point = {...data};
+
+    delete point.isDisabled;
+    delete point.isSaving;
+    delete point.isDeleting;
 
     return point;
   }

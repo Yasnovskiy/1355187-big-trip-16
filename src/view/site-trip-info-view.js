@@ -22,6 +22,13 @@ export default class SiteTripInfoView extends AbstractView {
     this.#data = data;
   }
 
+  apdatePrice (points) {
+    const sumPrice = points.reduce((sum, item) => sum + item.basePrice , 0);
+
+    const sumElement = this.element.querySelector('.trip-info__cost-value');
+    sumElement.textContent = sumPrice;
+  }
+
   get template() {
     return createSiteTripInfoTemplate(this.#data);
   }

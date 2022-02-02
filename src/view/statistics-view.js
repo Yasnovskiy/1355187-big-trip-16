@@ -2,18 +2,19 @@ import SmartView from './smart-view';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-import { typeName } from '../mock/mockData';
+import { newArrayValue, arrValuePrice, arrValueCount, arrValueTime, timeForm } from '../utils/utils';
 
-const changeArrayName = typeName.map((element) => element.toUpperCase());
+const renderColorsChart = (colorsCtx, data) => {
 
-const renderColorsChart = (colorsCtx) => {
+  const dataNewObject = arrValuePrice(data);
+
   new Chart(colorsCtx, {
     plugins: [ChartDataLabels],
     type: 'horizontalBar',
     data: {
-      labels: [...changeArrayName],
+      labels: [...dataNewObject.type],
       datasets: [{
-        data: [400, 300, 200, 160, 150, 100],
+        data: [...dataNewObject.price],
         backgroundColor: '#ffffff',
         hoverBackgroundColor: '#ffffff',
         anchor: 'start',
@@ -74,14 +75,17 @@ const renderColorsChart = (colorsCtx) => {
   });
 };
 
-const renderDaysChart = (typeCtx) => {
+const renderDaysChart = (typeCtx, data) => {
+
+  const dataNewObject = arrValueCount(data);
+
   new Chart(typeCtx, {
     plugins: [ChartDataLabels],
     type: 'horizontalBar',
     data: {
-      labels: [...changeArrayName],
+      labels: [...dataNewObject.type],
       datasets: [{
-        data: [4, 3, 2, 1, 1, 1],
+        data: [...dataNewObject.count],
         backgroundColor: '#ffffff',
         hoverBackgroundColor: '#ffffff',
         anchor: 'start',
@@ -142,14 +146,17 @@ const renderDaysChart = (typeCtx) => {
   });
 };
 
-const renderTimeChart = (timeCtx) => (
-  new Chart(timeCtx, {
+const renderTimeChart = (typeCtx, data) => {
+
+  const dataNewObject = arrValueTime(data);
+
+  new Chart(typeCtx, {
     plugins: [ChartDataLabels],
     type: 'horizontalBar',
     data: {
-      labels: [...changeArrayName],
+      labels: [...dataNewObject.type],
       datasets: [{
-        data: [4, 3, 2, 1, 1, 1],
+        data: [...dataNewObject.time],
         backgroundColor: '#ffffff',
         hoverBackgroundColor: '#ffffff',
         anchor: 'start',
@@ -167,7 +174,7 @@ const renderTimeChart = (timeCtx) => (
           color: '#000000',
           anchor: 'end',
           align: 'start',
-          formatter: (val) => `${val}x`,
+          formatter: (val) => `${timeForm(val)}`,
         },
       },
       title: {
@@ -207,8 +214,8 @@ const renderTimeChart = (timeCtx) => (
         enabled: false,
       },
     },
-  })
-);
+  });
+};
 
 const createSiteTripInfoTemplate = () => (
   `<section class="statistics">
@@ -237,7 +244,7 @@ export default class StatisticsView extends SmartView {
   constructor(tasks) {
     super();
 
-    this._data = tasks;
+    this._data = newArrayValue(tasks);
 
     this.#setCharts();
   }
@@ -248,11 +255,6 @@ export default class StatisticsView extends SmartView {
 
   removeElement = () => {
     super.removeElement();
-
-    // if (this.#datepicker) {
-    //   this.#datepicker.destroy();
-    //   this.#datepicker = null;
-    // }
 
     if (this.#moneyChart) {
       this.#moneyChart.destroy();
@@ -273,7 +275,6 @@ export default class StatisticsView extends SmartView {
 
   restoreHandlers = () => {
     this.#setCharts();
-    // this.#setDatepicker();
   }
 
   #dateChangeHandler = ([dateFrom, dateTo]) => {
@@ -288,7 +289,6 @@ export default class StatisticsView extends SmartView {
   }
 
   #setCharts = () => {
-    // Нужно отрисовать два графика
     const colorsCtx = this.element.querySelector('#money');
     const typeCtx = this.element.querySelector('#type');
     const timeCtx = this.element.querySelector('#time');

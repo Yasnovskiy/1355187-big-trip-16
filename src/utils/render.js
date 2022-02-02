@@ -37,6 +37,7 @@ export const createElement = (template) => {
 
   return newElement.firstChild; // 3
 };
+
 // Единственный нюанс, что HTML в строке должен иметь общую обёртку,
 // то есть быть чем-то вроде <nav><a>Link 1</a><a>Link 2</a></nav>,
 // а не просто <a>Link 1</a><a>Link 2</a>

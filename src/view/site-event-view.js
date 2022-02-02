@@ -1,13 +1,13 @@
 import AbstractView from './abstract-view';
-import {dataFormater} from '../mock/mockData';
+import {dataFormater} from '../utils/utils';
 import dayjs from 'dayjs';
 
 const createOffers = (obj) => (
   ` ${obj.length > 0 ? `<h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-      ${obj.map(({id, description, price}) => `
+      ${obj.map(({id, title, price}) => `
         <li id=${id} class="event__offer">
-         <span class="event__offer-title">${description}</span>
+         <span class="event__offer-title">${title}</span>
            &plus;&euro;&nbsp;
           <span class="event__offer-price">${price}</span>
        </li>
@@ -16,7 +16,7 @@ const createOffers = (obj) => (
 );
 
 const createSiteEventTemplate = (obj) => {
-  const {basePrice, dateFrom, dateTo, id, isFavorite, offers, city, type} = obj;
+  const {basePrice, dateFrom, dateTo, id, destination, isFavorite, offers, type} = obj;
 
   const dateToObjA = dayjs(dateTo);
   const dateFromObjA = dayjs(dateFrom);
@@ -28,11 +28,11 @@ const createSiteEventTemplate = (obj) => {
   let diffTime = '';
 
   if (diffDay > 0) {
-    diffTime = `${diffDay}D ${diffDay * 24 - diffHoures}H ${diffHoures * 60 - diffMinutes}M`;
+    diffTime = `${diffDay} D ${diffHoures} H ${Math.abs(diffHoures * 60 - diffMinutes)} M`;
   } else if (diffHoures > 0) {
-    diffTime = `${diffHoures}H ${diffHoures * 60 - diffMinutes}M`;
+    diffTime = `${diffHoures} H ${Math.abs(diffHoures * 60 - diffMinutes)} M`;
   } else {
-    diffTime = `${diffMinutes}M`;
+    diffTime = `${diffMinutes} M`;
   }
 
   const classActive = isFavorite ? 'event__favorite-btn--active': '';
@@ -43,7 +43,7 @@ const createSiteEventTemplate = (obj) => {
     <div class="event__type">
       <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
     </div>
-    <h3 class="event__title">${type} ${city}</h3>
+    <h3 class="event__title">${type} ${destination.name}</h3>
     <div class="event__schedule">
       <p class="event__time">
         <time class="event__start-time" datetime=${dataFormater(dateFrom, 'YMDH')}>${dataFormater(dateFrom, 'Hm')}</time>
