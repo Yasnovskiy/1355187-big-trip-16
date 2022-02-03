@@ -29,10 +29,6 @@ export const timeForm = (date) => {
     diffTime = `${diffMinutes} M`;
   }
 
-  console.log(diffDay);
-  console.log(diffHoures);
-  console.log(diffMinutes);
-
   return diffTime;
 
 
@@ -136,8 +132,6 @@ export const timeSum = (dateTo, dateFrom) => {
 
   const diffDay = dateToObjA.diff(dateFromObjA);
 
-  console.log(diffDay);
-
   // const diffHoures = dateToObjA.diff(dateFromObjA, 'h');
   // const diffMinutes = dateToObjA.diff(dateFromObjA, 'm');
 
@@ -197,3 +191,6 @@ export const newArrayValue = (points) => {
 
   return newData;
 };
+
+export const isObjectEmpty = (value) => Object.prototype.toString.call(value) === '[object Object]' && JSON.stringify(value) === '{}';
+

@@ -16,7 +16,7 @@ const createOffers = (obj) => (
 );
 
 const createSiteEventTemplate = (obj) => {
-  const {basePrice, dateFrom, dateTo, id, destination, isFavorite, offers, type} = obj;
+  const {basePrice, dateFrom, dateTo, destination, isFavorite, offers, type} = obj;
 
   const dateToObjA = dayjs(dateTo);
   const dateFromObjA = dayjs(dateFrom);
@@ -37,7 +37,7 @@ const createSiteEventTemplate = (obj) => {
 
   const classActive = isFavorite ? 'event__favorite-btn--active': '';
 
-  return `<li id=${id} class="trip-events__item">
+  return `<li class="trip-events__item">
   <div class="event">
     <time class="event__date" datetime=${dataFormater(dateFrom, 'YMD')}>${dataFormater(dateFrom, 'MD')}</time>
     <div class="event__type">

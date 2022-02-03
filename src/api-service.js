@@ -90,7 +90,7 @@ export default class ApiService {
   #adaptToServer = (point, destinations, offers) => {
     const adaptedTask = {...point,
       destinations,
-      offerArray: [offers],
+      offerArray: [...offers],
       'base_price': point.basePrice,
       'date_from': point.dateFrom instanceof Date ? point.dateFrom.toISOString() : null, // На сервере дата хранится в ISO формате
       'date_to': point.dateTo instanceof Date ? point.dateTo.toISOString() : null, // На сервере дата хранится в ISO формате
@@ -98,6 +98,8 @@ export default class ApiService {
     };
 
     // Ненужные ключи мы удаляем
+    delete adaptedTask.destinations;
+    delete adaptedTask.offerArray;
     delete adaptedTask.basePrice;
     delete adaptedTask.dateFrom;
     delete adaptedTask.dateTo;

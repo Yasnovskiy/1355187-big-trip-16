@@ -31,14 +31,27 @@ export default class PointerPresenter {
     this.#changerMode = changeMode;
   }
 
-  init = (point) => {
+  init = (point, metaData) => {
+    if (!point) {
+      this.#mode = 'NEW';
+      this.#changeData('StartCreatePoint');
+      this.#pointEditComponent = new SiteAddNewTripView(point, true, metaData);
+      this.#pointEditComponent.setFormCloseClickHandler(this.#handleFormSubmit);
+      this.#pointEditComponent.setFormOpenClickHandler(this.#handleCloseFormClick);
+      this.#pointEditComponent.setDeleteClickHandler(this.#handleDeleteClick);
+
+      render(this.#pointListContainer, this.#pointEditComponent, RenderPosition.AFTERBEGIN);
+
+      return;
+    }
+
     this.#point = point;
 
     const prevTaskComponent = this.#pointComponent;
     const prevTaskEditComponent = this.#pointEditComponent;
 
     this.#pointComponent = new SiteEventView(point);
-    this.#pointEditComponent = new SiteAddNewTripView(point, true);
+    this.#pointEditComponent = new SiteAddNewTripView(point, true, metaData);
 
     this.#pointComponent.setFormOpenClickHandler(this.#handleEditClick);
     this.#pointComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
@@ -71,6 +84,12 @@ export default class PointerPresenter {
   }
 
   resetView = () => {
+    if (this.#mode === 'NEW') {
+      this.#changeData('EndCreatePoint');
+      this.#pointEditComponent.element.remove();
+      this.#pointEditComponent.removeElement();
+      return;
+    }
     if (this.#mode !== Mode.DEFAULT) {
       this.#pointEditComponent.reset(this.#point);
       this.#replaceFormToTrip();

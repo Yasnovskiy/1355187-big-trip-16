@@ -4,6 +4,7 @@ import { UpdateType } from '../utils/const';
 export default class PointsModel extends AbstractObservable {
   #apiService = null;
   #points = [];
+  #isNewPoint = false;
 
   #destinations = [];
   #offers = [];
@@ -102,7 +103,7 @@ export default class PointsModel extends AbstractObservable {
         ...this.#points.slice(index + 1),
       ];
 
-      this._notify(updateType);
+      this._notify(updateType, this.#points);
 
     } catch(err) {
 
@@ -114,7 +115,7 @@ export default class PointsModel extends AbstractObservable {
   #adaptToClient = (point, destinations, offers) => {
     const adaptedTask = {...point,
       destinations,
-      offerArray: [offers],
+      offerArray: [...offers],
       basePrice: point['base_price'],
       dateFrom: point['date_from'] !== null ? new Date(point['date_from']) : point['date_from'], // На клиенте дата хранится как экземпляр Date
       dateTo: point['date_to'] !== null ? new Date(point['date_to']) : point['date_to'], // На клиенте дата хранится как экземпляр Date

@@ -6,6 +6,8 @@ import { typeName } from '../utils/const.js';
 import flatpickr from 'flatpickr';
 import { Russian } from 'flatpickr/dist/l10n/ru.js';
 
+import { isObjectEmpty } from '../utils/utils';
+
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 const BLANK_POINT = {
@@ -64,20 +66,16 @@ const createOffersemplate = (obj) => (
     </section>`: ''}`
 );
 
-// const createOptionTemplate = (obj) => (
-//   ` ${obj? `
-//       ${obj.map((item) => `
-//         <option value=${item.name}></option>
-//       `).join('')}` : ''}`
-// );
-
 const createOptionTemplate = (obj) => (
-  `<option value='Город'></option>`
+  ` ${obj? `
+      ${obj.map((item) => `
+        <option value=${item.name}></option>
+      `).join('')}` : ''}`
 );
 
 const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
 
-  const { id, basePrice, dateFrom, dateTo, offerArray, destination = [], offers , offersArray = [{ type: 'bus', offers: [] }], type, isDisabled, isSaving, isDeleting} = obj;
+  const { id, basePrice, dateFrom, dateTo, offerArray, destination, destinations,  type, isDisabled, isSaving, isDeleting} = obj;
 
   const dfsdf = currentFilter ?
     `<button class="event__reset-btn" type="reset">${isDeleting ? 'Delete...' : 'Delete'}</button>
@@ -85,9 +83,9 @@ const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
         <span class="visually-hidden">Open event</span>
       </button>`: '<button class="event__reset-btn" type="reset">Cancel</button>';
 
-  // const selectedType = offerArray.find((item) => item.type === type) || {offers : {}};
+  const selectedType = offerArray.find((item) => item.type === type) || {offers : {}};
 
-  // const selectedCity = offerArray.find((item) => item.name === city) || { distanation: {} };
+  const selectedName = destinations.find((item) => item.name === destination.name) || {};
 
   return `<li id=${id} class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
@@ -111,9 +109,9 @@ const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
         <label class="event__label  event__type-output" for="event-destination-1">
           ${type}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" ${isDisabled ? 'disabled' : ''} value=${destination === undefined ? 'Выберите город' : destination.name} list="destination-list-1">
+        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" ${isDisabled ? 'disabled' : ''} value=${isObjectEmpty(selectedName) ? 'Город' : selectedName.name} list="destination-list-1">
        <datalist id="destination-list-1">
-       ${createOptionTemplate(destination)}
+       ${createOptionTemplate(destinations)}
         </datalist>
       </div>
 
@@ -136,8 +134,8 @@ const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
         ${dfsdf}
     </header>
     <section class="event__details">
-      ${createOffersemplate(offers)}
-      ${createDestinationTemplate(destination)}
+      ${createOffersemplate(selectedType.offers)}
+      ${createDestinationTemplate(selectedName)}
     </section>
   </form>
 </li>`;
@@ -148,13 +146,13 @@ export default class SiteAddNewTripView extends SmartView {
   #dataEndPicker = null;
 
   #currentFilter = null;
+  #metaData = {};
 
   constructor (point = BLANK_POINT, currentFilter, metaData) {
     super();
     this.#currentFilter = currentFilter;
     this._data = SiteAddNewTripView.parseTaskToData(point, metaData);
-
-    console.log(metaData);
+    this.#metaData = metaData;
     this.#setInnerHandlers();
     this.#setDatepicker();
   }
@@ -179,7 +177,7 @@ export default class SiteAddNewTripView extends SmartView {
 
   reset = (point) => {
     this.updateData(
-      SiteAddNewTripView.parseTaskToData(point),
+      SiteAddNewTripView.parseTaskToData(point, this.#metaData),
     );
   }
 
@@ -255,6 +253,7 @@ export default class SiteAddNewTripView extends SmartView {
 
   #setInnerHandlers = () => {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#dueDateEndChangeHrwerwandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#cityChangeHandler);
   }
 
@@ -281,8 +280,25 @@ export default class SiteAddNewTripView extends SmartView {
   }
 
   #cityChangeHandler = (evt) => {
+    let newDestination;
+
+    if (evt.target.value === '' || evt.target.value === undefined) {
+      newDestination = {};
+    }
+
+    newDestination = this._data.destinations.find((item) => item.name === evt.target.value);
+
     this.updateData({
-      city: evt.target.value,
+      destination : newDestination,
+    });
+  }
+
+  #dueDateEndChangeHrwerwandler = () => {
+
+    const newOffers = this._data.offerArray.find((item) => item.type === this._data.type);
+
+    this.updateData({
+      offers: [...newOffers.offers],
     });
   }
 
@@ -296,7 +312,12 @@ export default class SiteAddNewTripView extends SmartView {
     this._callback.openClick(SiteAddNewTripView.parseDataToTask(this._data));
   }
 
-  static parseTaskToData = (data) => ({...data,
+  static parseTaskToData = (data, metaData) => ({
+    destinations: metaData.destinations,
+    destination: metaData.destinations[0],
+    offerArray: metaData.offers,
+    offers: metaData.offers.find((offer) => data.type === offer.type),
+    ...data,
     isDisabled: false,
     isSaving: false,
     isDeleting: false,

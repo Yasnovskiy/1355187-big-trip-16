@@ -20,11 +20,17 @@ export default class SiteBtnNewEventView extends AbstractView {
   #clickBtnOpenNewEvent = (evt) => {
     evt.preventDefault();
     this._callback.click();
+  }
+
+  disabledButton() {
     this.element.setAttribute('disabled', 'disabled');
+  }
+
+  removeDisabled() {
+    this.element.removeAttribute('disabled');
   }
 
   #clickRemoveEvent = (evt) => {
     evt.preventDefault();
-    this.element.removeAttribute('disabled');
   }
 }
