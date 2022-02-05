@@ -81,7 +81,7 @@ export const generateDate = (date) => {
     daysGap = getRandomInteger(1, -maxDaysGap);
   }
 
-  return dayjs().add(daysGap, 'hour').toDate();
+  return dayjs().add(daysGap, 'day').toDate();
 };
 
 export const dataFormater = (value, type) => {
@@ -89,6 +89,8 @@ export const dataFormater = (value, type) => {
 
   if (type === 'MD') {
     data = dayjs(value).format('MMM D');
+  } else if (type === 'D') {
+    data = dayjs(value).format('D');
   } else if (type === 'YMD') {
     data = dayjs(value).format('YYYY-MM-DD');
   } else if (type === 'YMDH') {
@@ -98,4 +100,18 @@ export const dataFormater = (value, type) => {
   }
 
   return data;
+};
+
+export const isTaskExpired = (dueDate) => {
+
+  // const nowDataFormate = dataFormater(dayjs(), 'YMD');
+  const dueDateFormate = dataFormater(dueDate, 'YMD');
+
+  console.log(dueDateFormate);
+  // console.log(dueDate);
+  // console.log(dayjs(dueDate));
+  // console.log(dayjs().isAfter(dueDate, 'D'));
+  console.log(dayjs().isAfter('2022-01-16', 'D'));
+
+  return dayjs().isBefore(dueDateFormate, 'D');
 };

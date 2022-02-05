@@ -1,6 +1,6 @@
 import AbstractView from './abstract-view';
 
-export const createSiteTripInfoTemplate = (array) => {
+const createSiteTripInfoTemplate = (array) => {
   const sumPrice = array.reduce((sum, item) => sum + item.basePrice , 0);
 
   return `<section class="trip-main__trip-info  trip-info">
