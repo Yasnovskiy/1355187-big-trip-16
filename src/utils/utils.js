@@ -191,6 +191,3 @@ export const newArrayValue = (points) => {
 
   return newData;
 };
-
-export const isObjectEmpty = (value) => Object.prototype.toString.call(value) === '[object Object]' && JSON.stringify(value) === '{}';
-

@@ -1,5 +1,3 @@
-// import SiteTripInfoView from '../view/site-trip-info-view';
-// import SiteMenuView from '../view/site-menu-view';
 import SiteSortView from '../view/site-sort-view';
 import SiteEventsListView from '../view/site-events-list-view';
 import SiteLoadingView from '../view/site-loading-view';
@@ -14,6 +12,16 @@ import {render, remove, RenderPosition} from '../utils/render';
 import { sortIdFormEvent, UpdateType, UserAction, FilterType } from '../utils/const';
 import { timeSum } from '../utils/utils';
 
+const BLANK_POINT = {
+  basePrice: 1,
+  dateFrom: new Date(),
+  dateTo: new Date(),
+  destination: {},
+  offers: [],
+  isFavorite: false,
+  type: 'flight',
+};
+
 export default class TripPresenter {
   #tripMain = null;
   #tripNavigation = null;
@@ -22,7 +30,6 @@ export default class TripPresenter {
   #pointsModel = null;
   #filterModel = null;
 
-  // #tripMenuComponent = new SiteMenuView();
   #tripBtnNewEvent = new SiteBtnNewEventView();
   #tripListComponent = new SiteEventsListView();
   #loadingComponent  = new SiteLoadingView();
@@ -113,31 +120,23 @@ export default class TripPresenter {
   }
 
   #handleModeChange = () => {
+    this.#pointNewPresenter.destroy();
     this.#pointPresenter.forEach((presenterItem) => presenterItem.resetView());
   }
 
 
   createPoint = () => {
-
     const {destinations, offers} = this.#pointsModel;
 
-    const pointPresenter = new PointerPresenter(this.#tripListComponent, this.#handleViewAction, this.#handleModeChange);
+    this.#pointNewPresenter.init({...BLANK_POINT,
+      destinations: [...destinations],
+      offerArray: [...offers],
+    });
 
-    pointPresenter.init(undefined, {destinations, offers});
-
-    this.#pointPresenter.set('NEW', pointPresenter);
-
+    this.#tripBtnNewEvent.disabledButton();
   }
 
-  // #handlePointChange = (updatedTask) => {
-  //   // this.#tripsArray = updateItem(this.#tripsArray, updatedTask);
-  //   // this.#sourcedTripsArray = updateItem(this.#sourcedTripsArray, updatedTask);
-
-  //   this.#pointPresenter.get(updatedTask.id).init(updatedTask);
-  // }
-
   #handleViewAction = async (actionType, updateType, update) => {
-
     switch (actionType) {
       case UserAction.UPDATE_TASK:
         this.#pointPresenter.get(update.id).setViewState(PointerPresenterViewState.SAVING);
@@ -152,8 +151,6 @@ export default class TripPresenter {
         break;
       case UserAction.ADD_TASK:
         this.#pointNewPresenter.setSaving();
-        // this.#pointNewPresenter.destroy();
-        // this.#pointsModel.addTrip(updateType, update);
 
         try {
           await this.#pointsModel.addTrip(updateType, update);
@@ -212,29 +209,6 @@ export default class TripPresenter {
     this.#clearPointList();
     this.#renderTrip();
   }
-
-  // #handlerFilterPointChange = (filterPoint) => {
-  //   if (this.#currentFilterPoint === filterPoint) {
-  //     return;
-  //   }
-
-  //   this.#clearPointList();
-  //   this.#renderPointList();
-  // }
-
-  #handlerClickBtn = () => {
-    // this.#tripNewEventView.setFormCloseClickHandler(this.#handleFormSubmit);
-  }
-
-  #handleFormSubmit = () => {
-    remove(this.#pointNewPresenter);
-    // console.log('Xt');
-  }
-
-  // #renderNoPoints = () => {
-  //   this.#noPointComponents = new SiteNoEventView(this.#filterType);
-  //   // render нужен
-  // }
 
   #renderBtnNewEvent = () => {
     render(this.#tripMain, this.#tripBtnNewEvent, RenderPosition.BEFOREEND);

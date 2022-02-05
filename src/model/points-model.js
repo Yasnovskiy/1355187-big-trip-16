@@ -4,7 +4,6 @@ import { UpdateType } from '../utils/const';
 export default class PointsModel extends AbstractObservable {
   #apiService = null;
   #points = [];
-  #isNewPoint = false;
 
   #destinations = [];
   #offers = [];
@@ -56,7 +55,7 @@ export default class PointsModel extends AbstractObservable {
 
     try {
       const response = await this.#apiService.updatePoint(update);
-      const updatedPoint = this.#adaptToClient(response);
+      const updatedPoint = this.#adaptToClient(response, this.#destinations, this.#offers);
 
       this.#points = [
         ...this.#points.slice(0, index),
@@ -76,7 +75,7 @@ export default class PointsModel extends AbstractObservable {
   addTrip = async (updateType, update) => {
     try {
       const respons = await this.#apiService.addPoint(update);
-      const newPoint = this.#adaptToClient(respons);
+      const newPoint = this.#adaptToClient(respons, this.#destinations, this.#offers);
 
       this.#points = [newPoint, ...this.#points];
       this._notify(updateType, this.#points);
@@ -114,15 +113,14 @@ export default class PointsModel extends AbstractObservable {
 
   #adaptToClient = (point, destinations, offers) => {
     const adaptedTask = {...point,
-      destinations,
-      offerArray: [...offers],
       basePrice: point['base_price'],
       dateFrom: point['date_from'] !== null ? new Date(point['date_from']) : point['date_from'], // На клиенте дата хранится как экземпляр Date
       dateTo: point['date_to'] !== null ? new Date(point['date_to']) : point['date_to'], // На клиенте дата хранится как экземпляр Date
       isFavorite: point['is_favorite'],
+      destinations: [...destinations],
+      offerArray: [...offers],
     };
 
-    // Ненужные ключи мы удаляем
     delete adaptedTask['base_price'];
     delete adaptedTask['date_from'];
     delete adaptedTask['date_to'];

@@ -1,22 +1,11 @@
 import SmartView from './smart-view';
-import {dataFormater} from '../utils/utils';
-
-import { typeName } from '../utils/const.js';
 
 import flatpickr from 'flatpickr';
 import { Russian } from 'flatpickr/dist/l10n/ru.js';
-
-import { isObjectEmpty } from '../utils/utils';
-
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
-const BLANK_POINT = {
-  basePrice: 0,
-  dateFrom: null,
-  dateTo: null,
-  isFavorite: false,
-  type: 'flight',
-};
+import {dataFormater} from '../utils/utils';
+import { typeName } from '../utils/const.js';
 
 const createImgTemplate = (obj) => (
   `${obj ? `
@@ -75,7 +64,7 @@ const createOptionTemplate = (obj) => (
 
 const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
 
-  const { id, basePrice, dateFrom, dateTo, offerArray, destination, destinations,  type, isDisabled, isSaving, isDeleting} = obj;
+  const { id, basePrice, dateFrom, dateTo, offers, destination, destinations,  type, isDisabled, isSaving, isDeleting} = obj;
 
   const dfsdf = currentFilter ?
     `<button class="event__reset-btn" type="reset">${isDeleting ? 'Delete...' : 'Delete'}</button>
@@ -83,9 +72,7 @@ const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
         <span class="visually-hidden">Open event</span>
       </button>`: '<button class="event__reset-btn" type="reset">Cancel</button>';
 
-  const selectedType = offerArray.find((item) => item.type === type) || {offers : {}};
-
-  const selectedName = destinations.find((item) => item.name === destination.name) || {};
+  const destinationName = destination.name === undefined ? '' : destination.name;
 
   return `<li id=${id} class="trip-events__item">
   <form class="event event--edit" action="#" method="post">
@@ -109,7 +96,7 @@ const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
         <label class="event__label  event__type-output" for="event-destination-1">
           ${type}
         </label>
-        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" ${isDisabled ? 'disabled' : ''} value=${isObjectEmpty(selectedName) ? 'Город' : selectedName.name} list="destination-list-1">
+        <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" required  value="${destinationName}" list="destination-list-1">
        <datalist id="destination-list-1">
        ${createOptionTemplate(destinations)}
         </datalist>
@@ -134,8 +121,8 @@ const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
         ${dfsdf}
     </header>
     <section class="event__details">
-      ${createOffersemplate(selectedType.offers)}
-      ${createDestinationTemplate(selectedName)}
+      ${createOffersemplate(offers)}
+      ${createDestinationTemplate(destination)}
     </section>
   </form>
 </li>`;
@@ -148,7 +135,7 @@ export default class SiteAddNewTripView extends SmartView {
   #currentFilter = null;
   #metaData = {};
 
-  constructor (point = BLANK_POINT, currentFilter, metaData) {
+  constructor (point, currentFilter, metaData) {
     super();
     this.#currentFilter = currentFilter;
     this._data = SiteAddNewTripView.parseTaskToData(point, metaData);
@@ -197,11 +184,7 @@ export default class SiteAddNewTripView extends SmartView {
   setDeleteClickHandler = (callback) => {
     this._callback.deleteClick = callback;
 
-    // if (this.element.querySelector('.event__rollup-btn')) {
-
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteClickHandler);
-    // }
-    // this.element.querySelector('.event__input--destination').addEventListener('change', this.#formDeleteClickHandler);
   }
 
   setFormOpenClickHandler = (callback) => {
@@ -255,6 +238,7 @@ export default class SiteAddNewTripView extends SmartView {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
     this.element.querySelector('.event__type-group').addEventListener('change', this.#dueDateEndChangeHrwerwandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#cityChangeHandler);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#priceChangeHandler);
   }
 
   #dueDateStartChangeHandler = ([userDate]) => {
@@ -279,14 +263,14 @@ export default class SiteAddNewTripView extends SmartView {
     }
   }
 
+  #priceChangeHandler = (evt) => {
+    this.updateData({
+      basePrice: Number(evt.target.value),
+    });
+  }
+
   #cityChangeHandler = (evt) => {
-    let newDestination;
-
-    if (evt.target.value === '' || evt.target.value === undefined) {
-      newDestination = {};
-    }
-
-    newDestination = this._data.destinations.find((item) => item.name === evt.target.value);
+    const newDestination = this._data.destinations.find((item) => item.name === evt.target.value);
 
     this.updateData({
       destination : newDestination,
@@ -307,16 +291,7 @@ export default class SiteAddNewTripView extends SmartView {
     this._callback.openClick(SiteAddNewTripView.parseDataToTask(this._data));
   }
 
-  #formCloseClickHandler = (evt) => {
-    evt.preventDefault();
-    this._callback.openClick(SiteAddNewTripView.parseDataToTask(this._data));
-  }
-
-  static parseTaskToData = (data, metaData) => ({
-    destinations: metaData.destinations,
-    destination: metaData.destinations[0],
-    offerArray: metaData.offers,
-    offers: metaData.offers.find((offer) => data.type === offer.type),
+  static parseTaskToData = (data) => ({
     ...data,
     isDisabled: false,
     isSaving: false,

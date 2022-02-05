@@ -10,7 +10,6 @@ import FilterModel from './model/filter-model.js';
 
 import FilterPresenter from './presenter/filter-presenter.js';
 import TripPresenter from './presenter/trip-presenter.js';
-import MenuPresenter from './presenter/menu-presenter.js';
 
 import ApiService from './api-service.js';
 
@@ -27,9 +26,7 @@ const pointsModel = new PointsModel(new ApiService(END_POINT, AUTHORIZATION));
 
 const tripPresenter = new TripPresenter(siteTripMain, siteMainTripEvents, pointsModel, filterModel);
 const filterPresenter = new FilterPresenter( siteFilterElement, filterModel);
-const menuPresenter = new MenuPresenter(siteTripMain, pointsModel);
 
-// презентер menu
 const tripInfoComponent = new SiteTripInfoView(pointsModel.points);
 const menuComponent = new SiteMenuView();
 
@@ -57,19 +54,12 @@ export const handleSiteMenuClick = (menuItem) => {
   }
 };
 
-menuPresenter.init();
-filterPresenter.init();
 tripPresenter.init();
 
-
 pointsModel.init().finally(() => {
-  // render(siteTripMain, tripInfoComponent, RenderPosition.AFTERBEGIN);
+  render(siteTripMain, tripInfoComponent, RenderPosition.AFTERBEGIN);
   render(siteNavigationElement, menuComponent, RenderPosition.BEFOREEND);
 
   menuComponent.setMenuClickHandler(handleSiteMenuClick);
-
-  // document.querySelector('.trip-main__event-add-btn').addEventListener('click', (evt) => {
-  //   evt.preventDefault();
-  //   tripPresenter.createPoint();
-  // });
+  filterPresenter.init();
 });

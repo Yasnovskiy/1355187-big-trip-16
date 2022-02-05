@@ -12,11 +12,6 @@ export default class SiteBtnNewEventView extends AbstractView {
     this.element.addEventListener('click', this.#clickBtnOpenNewEvent);
   }
 
-  // setClickNoDisabledBtn = (callback) => {
-  //   this._callback.click = callback;
-  //   this.element.addEventListener('click', this.#clickRemoveEvent);
-  // }
-
   #clickBtnOpenNewEvent = (evt) => {
     evt.preventDefault();
     this._callback.click();
@@ -28,9 +23,5 @@ export default class SiteBtnNewEventView extends AbstractView {
 
   removeDisabled() {
     this.element.removeAttribute('disabled');
-  }
-
-  #clickRemoveEvent = (evt) => {
-    evt.preventDefault();
   }
 }

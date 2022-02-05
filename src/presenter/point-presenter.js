@@ -31,27 +31,14 @@ export default class PointerPresenter {
     this.#changerMode = changeMode;
   }
 
-  init = (point, metaData) => {
-    if (!point) {
-      this.#mode = 'NEW';
-      this.#changeData('StartCreatePoint');
-      this.#pointEditComponent = new SiteAddNewTripView(point, true, metaData);
-      this.#pointEditComponent.setFormCloseClickHandler(this.#handleFormSubmit);
-      this.#pointEditComponent.setFormOpenClickHandler(this.#handleCloseFormClick);
-      this.#pointEditComponent.setDeleteClickHandler(this.#handleDeleteClick);
-
-      render(this.#pointListContainer, this.#pointEditComponent, RenderPosition.AFTERBEGIN);
-
-      return;
-    }
-
+  init = (point) => {
     this.#point = point;
 
     const prevTaskComponent = this.#pointComponent;
     const prevTaskEditComponent = this.#pointEditComponent;
 
     this.#pointComponent = new SiteEventView(point);
-    this.#pointEditComponent = new SiteAddNewTripView(point, true, metaData);
+    this.#pointEditComponent = new SiteAddNewTripView(point, true);
 
     this.#pointComponent.setFormOpenClickHandler(this.#handleEditClick);
     this.#pointComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
