@@ -40,13 +40,13 @@ const createTypeItemTemplate = (array, type, isDisabled) => (
 
 
 const createOffersemplate = (obj) => (
-  ` ${obj.length > 0 || undefined ? `
+  `${obj.length > 0 || undefined ? `
     <section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
         ${obj.map(({id, title, price}) => `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-luggage-${id}" type="checkbox" name="event-offer-luggage" checked>
-        <label class="event__offer-label" for="event-offer-luggage-${id}">
+        <input class="event__offer-checkbox  visually-hidden" id="${id}" type="checkbox" value='${price}' name="event-offer-luggage" checked>
+        <label class="event__offer-label" for="${id}">
           <span class="event__offer-title">${title}</span>
             &plus;&euro;&nbsp;
           <span class="event__offer-price">${price}</span>
@@ -63,10 +63,9 @@ const createOptionTemplate = (obj) => (
 );
 
 const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
-
   const { id, basePrice, dateFrom, dateTo, offers, destination, destinations,  type, isDisabled, isSaving, isDeleting} = obj;
 
-  const dfsdf = currentFilter ?
+  const buttonOption = currentFilter ?
     `<button class="event__reset-btn" type="reset">${isDeleting ? 'Delete...' : 'Delete'}</button>
       <button class="event__rollup-btn" type="button">
         <span class="visually-hidden">Open event</span>
@@ -118,7 +117,7 @@ const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
         <input class="event__input  event__input--price" id="event-price-1" type="number" ${isDisabled ? 'disabled' : ''} name="event-price" value=${basePrice}>
       </div>
       <button class="event__save-btn  btn  btn--blue" type="submit">${isSaving ? 'Save...' : 'Save'}</button>
-        ${dfsdf}
+        ${buttonOption}
     </header>
     <section class="event__details">
       ${createOffersemplate(offers)}
@@ -133,13 +132,12 @@ export default class SiteAddNewTripView extends SmartView {
   #dataEndPicker = null;
 
   #currentFilter = null;
-  #metaData = {};
 
-  constructor (point, currentFilter, metaData) {
+  constructor (point, currentFilter) {
     super();
+
     this.#currentFilter = currentFilter;
-    this._data = SiteAddNewTripView.parseTaskToData(point, metaData);
-    this.#metaData = metaData;
+    this._data = SiteAddNewTripView.parseTaskToData(point);
     this.#setInnerHandlers();
     this.#setDatepicker();
   }
@@ -164,7 +162,7 @@ export default class SiteAddNewTripView extends SmartView {
 
   reset = (point) => {
     this.updateData(
-      SiteAddNewTripView.parseTaskToData(point, this.#metaData),
+      SiteAddNewTripView.parseTaskToData(point),
     );
   }
 
@@ -189,6 +187,7 @@ export default class SiteAddNewTripView extends SmartView {
 
   setFormOpenClickHandler = (callback) => {
     this._callback.closeClick = callback;
+
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formOpenClickHandler);
 
     if (this.element.querySelector('.event__rollup-btn')) {
@@ -239,6 +238,10 @@ export default class SiteAddNewTripView extends SmartView {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#dueDateEndChangeHrwerwandler);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#cityChangeHandler);
     this.element.querySelector('.event__input--price').addEventListener('change', this.#priceChangeHandler);
+
+    if (this._data.offers.length > 0) {
+      this.element.querySelector('.event__available-offers').addEventListener('change', this.#offerItemChangeHandler);
+    }
   }
 
   #dueDateStartChangeHandler = ([userDate]) => {
@@ -261,6 +264,24 @@ export default class SiteAddNewTripView extends SmartView {
         type: evt.target.value,
       });
     }
+  }
+
+  #offerItemChangeHandler = (evt) => {
+    let offerItem;
+
+    if (!evt.target.checked) {
+      offerItem = this._data.offers.findIndex((item) => item.id === Number(evt.target.id));
+    }
+
+    this._data.offers = [
+      ...this._data.offers.slice(0, offerItem),
+      ...this._data.offers.slice(offerItem + 1),
+    ];
+
+    this.updateData({
+      offers: this._data.offers,
+    });
+
   }
 
   #priceChangeHandler = (evt) => {

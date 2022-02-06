@@ -2,7 +2,7 @@ import SmartView from './smart-view';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-import { newArrayValue, arrValuePrice, arrValueCount, arrValueTime, timeForm } from '../utils/utils';
+import { newArrayValue, arrValuePrice, arrValueCount, arrValueTime, formatDateTrip } from '../utils/utils';
 
 const renderColorsChart = (colorsCtx, data) => {
 
@@ -174,7 +174,7 @@ const renderTimeChart = (typeCtx, data) => {
           color: '#000000',
           anchor: 'end',
           align: 'start',
-          formatter: (val) => `${timeForm(val)}`,
+          formatter: (val) => `${formatDateTrip(val)}`,
         },
       },
       title: {

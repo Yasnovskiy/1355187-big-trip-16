@@ -1,6 +1,7 @@
 import AbstractView from './abstract-view';
 import {dataFormater} from '../utils/utils';
-import dayjs from 'dayjs';
+
+import { formatDateTrip } from '../utils/utils';
 
 const createOffers = (obj) => (
   ` ${obj.length > 0 ? `<h4 class="visually-hidden">Offers:</h4>
@@ -18,23 +19,6 @@ const createOffers = (obj) => (
 const createSiteEventTemplate = (obj) => {
   const {basePrice, dateFrom, dateTo, destination, isFavorite, offers, type} = obj;
 
-  const dateToObjA = dayjs(dateTo);
-  const dateFromObjA = dayjs(dateFrom);
-
-  const diffDay = dateToObjA.diff(dateFromObjA, 'd');
-  const diffHoures = dateToObjA.diff(dateFromObjA, 'h');
-  const diffMinutes = dateToObjA.diff(dateFromObjA, 'm');
-
-  let diffTime = '';
-
-  if (diffDay > 0) {
-    diffTime = `${diffDay} D ${diffHoures} H ${Math.abs(diffHoures * 60 - diffMinutes)} M`;
-  } else if (diffHoures > 0) {
-    diffTime = `${diffHoures} H ${Math.abs(diffHoures * 60 - diffMinutes)} M`;
-  } else {
-    diffTime = `${diffMinutes} M`;
-  }
-
   const classActive = isFavorite ? 'event__favorite-btn--active': '';
 
   return `<li class="trip-events__item">
@@ -50,7 +34,7 @@ const createSiteEventTemplate = (obj) => {
         &mdash;
         <time class="event__end-time" datetime=${dataFormater(dateTo, 'YMDH')}>${dataFormater(dateTo, 'Hm')}</time>
       </p>
-      <p class="event__duration">${diffTime}</p>
+      <p class="event__duration">${formatDateTrip(dateTo, dateFrom)}</p>
     </div>
     <p class="event__price">
       &euro;&nbsp;<span class="event__price-value">${basePrice}</span>

@@ -11,42 +11,6 @@ export const isTaskExpiringToday = (dueDate) => dayjs().isSameOrBefore(dueDate, 
 
 export const isTaskExpiringTodays = (dueDate) => dayjs().isSameOrAfter(dueDate, 'D');
 
-export const timeForm = (date) => {
-  // const dateToObjA = ;
-
-  const diffDay = dayjs(date).format('d');
-  const diffHoures = dayjs(date).format('h');
-  const diffMinutes = dayjs(date).format('m');
-
-
-  let diffTime = '';
-
-  if (diffDay > 0) {
-    diffTime = `${diffDay}D ${diffHoures}H ${Math.abs(diffMinutes)}M`;
-  } else if (diffHoures > 0) {
-    diffTime = `${diffHoures} H ${Math.abs(diffMinutes)} M`;
-  } else {
-    diffTime = `${diffMinutes} M`;
-  }
-
-  return diffTime;
-
-
-  // const diffHoures = dateToObjA.diff(dateFromObjA, 'h');
-  // const diffMinutes = dateToObjA.diff(dateFromObjA, 'm');
-
-  // let diffTime = '';
-
-  // if (diffDay > 0) {
-  //   diffTime = `${diffDay}D ${diffDay * 24 - diffHoures}H ${diffHoures * 60 - diffMinutes}M`;
-  // } else if (diffHoures > 0) {
-  //   diffTime = `${diffHoures}H ${diffHoures * 60 - diffMinutes}M`;
-  // } else {
-  //   diffTime = `${diffMinutes}M`;
-  // }
-
-};
-
 export const arrValuePrice = (arr) => {
   const arrKey = [];
   const arrValue = [];
@@ -105,7 +69,7 @@ export const arrValueTime = (arr) => {
   return objectDesiredValue;
 };
 
-export const formatDateTrip = (dateTo, dateFrom) => {
+export const formatDateTrip = (dateTo, dateFrom = 0) => {
   const dateToObjA = dayjs(dateTo);
   const dateFromObjA = dayjs(dateFrom);
 
@@ -116,11 +80,11 @@ export const formatDateTrip = (dateTo, dateFrom) => {
   let diffTime = '';
 
   if (diffDay > 0) {
-    diffTime = `${diffDay}D ${diffDay * 24 - diffHoures}H ${diffHoures * 60 - diffMinutes}M`;
+    diffTime = `${Math.abs(diffDay)}D ${Math.abs(diffDay * 24 - diffHoures)}H ${Math.abs(diffHoures * 60 - diffMinutes)}M`;
   } else if (diffHoures > 0) {
-    diffTime = `${diffHoures}H ${diffHoures * 60 - diffMinutes}M`;
+    diffTime = `${Math.abs(diffHoures)}H ${Math.abs(diffHoures * 60 - diffMinutes)}M`;
   } else {
-    diffTime = `${diffMinutes}M`;
+    diffTime = `${Math.abs(diffMinutes)}M`;
   }
 
   return diffTime;
@@ -131,19 +95,6 @@ export const timeSum = (dateTo, dateFrom) => {
   const dateFromObjA = dayjs(dateFrom);
 
   const diffDay = dateToObjA.diff(dateFromObjA);
-
-  // const diffHoures = dateToObjA.diff(dateFromObjA, 'h');
-  // const diffMinutes = dateToObjA.diff(dateFromObjA, 'm');
-
-  // let diffTime = '';
-
-  // if (diffDay > 0) {
-  //   diffTime = `${diffDay}D ${diffDay * 24 - diffHoures}H ${diffHoures * 60 - diffMinutes}M`;
-  // } else if (diffHoures > 0) {
-  //   diffTime = `${diffHoures}H ${diffHoures * 60 - diffMinutes}M`;
-  // } else {
-  //   diffTime = `${diffMinutes}M`;
-  // }
 
   return diffDay;
 };

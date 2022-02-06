@@ -71,12 +71,6 @@ export default class PointerPresenter {
   }
 
   resetView = () => {
-    if (this.#mode === 'NEW') {
-      this.#changeData('EndCreatePoint');
-      this.#pointEditComponent.element.remove();
-      this.#pointEditComponent.removeElement();
-      return;
-    }
     if (this.#mode !== Mode.DEFAULT) {
       this.#pointEditComponent.reset(this.#point);
       this.#replaceFormToTrip();
@@ -152,8 +146,6 @@ export default class PointerPresenter {
       UpdateType.MINOR,
       {...this.#point, ...newData}
     );
-    // this.#replaceFormToTrip();
-
   }
 
   #handleFavoriteClick = () => {

@@ -4,6 +4,7 @@ import { RenderPosition, render, remove } from './utils/render.js';
 import SiteMenuView from './view/site-menu-view.js';
 import SiteTripInfoView from './view/site-trip-info-view.js';
 import StatisticsView from './view/statistics-view.js';
+import SiteBtnNewEventView from './view/site-btn-new-event.js';
 
 import PointsModel from './model/points-model.js';
 import FilterModel from './model/filter-model.js';
@@ -24,11 +25,13 @@ const siteMainTripEvents = document.querySelector('.trip-events');
 const filterModel = new FilterModel();
 const pointsModel = new PointsModel(new ApiService(END_POINT, AUTHORIZATION));
 
-const tripPresenter = new TripPresenter(siteTripMain, siteMainTripEvents, pointsModel, filterModel);
-const filterPresenter = new FilterPresenter( siteFilterElement, filterModel);
+const filterPresenter = new FilterPresenter(siteFilterElement, filterModel);
+const tripPresenter = new TripPresenter(siteTripMain, siteMainTripEvents, pointsModel, filterModel, filterPresenter, filterPresenter);
 
 const tripInfoComponent = new SiteTripInfoView(pointsModel.points);
+
 const menuComponent = new SiteMenuView();
+const btrFsfs = new SiteBtnNewEventView();
 
 pointsModel.addObserver((type, points) => {
   tripInfoComponent.apdatePrice(points);
@@ -37,7 +40,13 @@ pointsModel.addObserver((type, points) => {
 let statisticsComponent = null;
 
 export const handleSiteMenuClick = (menuItem) => {
+
   switch (menuItem) {
+    case MenuItem.ADD_POINT:
+
+      console.log('Нажимаю');
+
+      break;
     case MenuItem.TABLE:
       remove(statisticsComponent);
 
@@ -61,5 +70,7 @@ pointsModel.init().finally(() => {
   render(siteNavigationElement, menuComponent, RenderPosition.BEFOREEND);
 
   menuComponent.setMenuClickHandler(handleSiteMenuClick);
+  btrFsfs.setClickBtn(handleSiteMenuClick);
+
   filterPresenter.init();
 });

@@ -7,6 +7,7 @@ import SiteNoEventView from '../view/site-no-event-view';
 
 import PointerPresenter, {State as PointerPresenterViewState} from './point-presenter';
 import NewPointPresenter from './new-point-presenter';
+
 import { filter } from '../utils/filters';
 import {render, remove, RenderPosition} from '../utils/render';
 import { sortIdFormEvent, UpdateType, UserAction, FilterType } from '../utils/const';
@@ -29,6 +30,7 @@ export default class TripPresenter {
 
   #pointsModel = null;
   #filterModel = null;
+  #fiterPres = null;
 
   #tripBtnNewEvent = new SiteBtnNewEventView();
   #tripListComponent = new SiteEventsListView();
@@ -46,14 +48,15 @@ export default class TripPresenter {
   #filterType = FilterType.EVERYTHING;
   #isLoading = true;
 
-  constructor (tripMain, tripContainer, pointsModel, filterModel) {
+  constructor (tripMain, tripContainer, pointsModel, filterModel, fiterPres) {
     this.#tripMain = tripMain;
     this.#tripContainer = tripContainer;
 
     this.#pointsModel = pointsModel;
     this.#filterModel = filterModel;
+    this.#fiterPres = fiterPres;
 
-    this.#pointNewPresenter = new NewPointPresenter(this.#tripListComponent ,this.#handleViewAction);
+    this.#pointNewPresenter = new NewPointPresenter(this.#tripListComponent , this.#handleViewAction, this.#tripBtnNewEvent.removeDisabled);
   }
 
   get points () {
@@ -105,7 +108,7 @@ export default class TripPresenter {
     this.#renderTrip();
 
     this.#tripBtnNewEvent.setClickBtn(() => {
-      this.createPoint();
+      this.createNewPoint();
     });
   }
 
@@ -121,16 +124,25 @@ export default class TripPresenter {
 
   #handleModeChange = () => {
     this.#pointNewPresenter.destroy();
+    this.#tripBtnNewEvent.removeDisabled();
+
     this.#pointPresenter.forEach((presenterItem) => presenterItem.resetView());
   }
 
 
-  createPoint = () => {
+  createNewPoint = () => {
     const {destinations, offers} = this.#pointsModel;
+
+    this.#fiterPres.destroy();
+    this.#fiterPres.init();
+
+    this.#clearPointList({resetSortType: true});
+    this.#renderTrip();
 
     this.#pointNewPresenter.init({...BLANK_POINT,
       destinations: [...destinations],
       offerArray: [...offers],
+      offers: offers.find((item) => item.type === BLANK_POINT.type).offers,
     });
 
     this.#tripBtnNewEvent.disabledButton();
@@ -154,8 +166,11 @@ export default class TripPresenter {
 
         try {
           await this.#pointsModel.addTrip(updateType, update);
+          this.#tripBtnNewEvent.removeDisabled();
         } catch(err) {
+
           this.#pointNewPresenter.setAborting();
+
         }
         break;
       case UserAction.DELETE_TASK:
@@ -166,12 +181,6 @@ export default class TripPresenter {
         } catch(err) {
           this.#pointPresenter.get(update.id).setViewState(PointerPresenterViewState.ABORTING);
         }
-        break;
-      case 'StartCreatePoint':
-        this.#tripBtnNewEvent.disabledButton();
-        break;
-      case 'EndCreatePoint':
-        this.#tripBtnNewEvent.removeDisabled();
         break;
     }
   }
@@ -229,11 +238,9 @@ export default class TripPresenter {
   }
 
   #renderPoint = (trip) => {
-    const {destinations, offers} = this.#pointsModel;
-
     const pointPresenter = new PointerPresenter(this.#tripListComponent, this.#handleViewAction, this.#handleModeChange);
 
-    pointPresenter.init(trip, {destinations, offers});
+    pointPresenter.init(trip);
 
     this.#pointPresenter.set(trip.id, pointPresenter);
   }
@@ -253,7 +260,8 @@ export default class TripPresenter {
   }
 
   #clearPointList = ({resetSortType = false} = {}) => {
-    this.#pointNewPresenter.destroy();
+    this.#pointNewPresenter.destroy(this.#tripBtnNewEvent.removeDisabled);
+
     this.#pointPresenter.forEach((presenter) => presenter.destroy());
     this.#pointPresenter.clear();
 

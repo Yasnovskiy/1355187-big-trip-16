@@ -1,6 +1,8 @@
 import AbstractView from './abstract-view';
 
-const createSiteBtnNewEventTemplate = () => '<button class="trip-main__event-add-btn  btn  btn--big  btn--yellow" type="button">New event</button>';
+import { MenuItem } from '../utils/const';
+
+const createSiteBtnNewEventTemplate = () => `<button class="trip-main__event-add-btn  btn  btn--big  btn--yellow"  type="button" name="${MenuItem.ADD_POINT}">New event</button>`;
 
 export default class SiteBtnNewEventView extends AbstractView {
   get template() {
@@ -8,6 +10,7 @@ export default class SiteBtnNewEventView extends AbstractView {
   }
 
   setClickBtn = (callback) => {
+    this._callback.sort = callback;
     this._callback.click = callback;
     this.element.addEventListener('click', this.#clickBtnOpenNewEvent);
   }
@@ -15,6 +18,7 @@ export default class SiteBtnNewEventView extends AbstractView {
   #clickBtnOpenNewEvent = (evt) => {
     evt.preventDefault();
     this._callback.click();
+    this._callback.sort(evt.target.name);
   }
 
   disabledButton() {

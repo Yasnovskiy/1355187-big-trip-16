@@ -1,5 +1,4 @@
 import SiteAddNewTripView from '../view/site-add-new-view';
-// import SiteBtnNewEventView from '../view/site-btn-new-event';
 import { remove, render,  RenderPosition} from '../utils/render';
 import { UserAction, UpdateType} from '../utils/const';
 
@@ -7,8 +6,6 @@ export default class NewPointPresenter  {
   #pointListContainer = null;
   #changeData = null;
   #pointEditComponent = null;
-
-  #pointNewDisabled = null;
 
   constructor (pointListContainer, changeData) {
     this.#pointListContainer = pointListContainer;
@@ -30,8 +27,6 @@ export default class NewPointPresenter  {
   }
 
   destroy = () => {
-    // this.#pointNewDisabled.removeDisabled();
-
     if (this.#pointEditComponent === null) {
       return;
     }
@@ -48,7 +43,6 @@ export default class NewPointPresenter  {
       isSaving: true,
     });
 
-    // this.#pointNewDisabled.removeDisabled();
   }
 
   setAborting = () => {
@@ -60,12 +54,10 @@ export default class NewPointPresenter  {
       });
     };
 
-    // this.#pointNewDisabled.removeDisabled();
     this.#pointEditComponent.shake(resetFormState);
   }
 
   #handleFormSubmit = (point) => {
-    // this.#pointNewDisabled.removeDisabled();
     this.#changeData(
       UserAction.ADD_TASK,
       UpdateType.MINOR,
@@ -80,7 +72,6 @@ export default class NewPointPresenter  {
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
-      // this.#pointNewDisabled.removeDisabled();
       this.destroy();
     }
   }
