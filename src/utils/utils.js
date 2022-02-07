@@ -1,11 +1,10 @@
-/* eslint-disable no-undef */
 import dayjs from 'dayjs';
 
-const isSameOrAfter = require('dayjs/plugin/isSameOrAfter');
-const isSameOrBefore = require('dayjs/plugin/isSameOrBefore');
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 
-dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 export const isTaskExpiringToday = (dueDate) => dayjs().isSameOrBefore(dueDate, 'D');
 
