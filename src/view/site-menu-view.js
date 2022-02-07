@@ -20,14 +20,6 @@ export default class SiteMenuView extends AbstractView {
     this.element.addEventListener('click', this.#menuClickHandler);
   }
 
-  setMenuItem = (menuItem) => {
-    const item = this.element.querySelector(`[data-type=${menuItem}]`);
-
-    if (item !== null) {
-      item.dataset.type = this.#currentDataType;
-    }
-  }
-
   #menuClickHandler = (evt) => {
     if (evt.target.tagName !== 'A') {
       return;
@@ -35,5 +27,6 @@ export default class SiteMenuView extends AbstractView {
 
     evt.preventDefault();
     this._callback.sortTypeChange(evt.target.dataset.type);
+    this.#currentDataType = evt.target.dataset.type;
   }
 }

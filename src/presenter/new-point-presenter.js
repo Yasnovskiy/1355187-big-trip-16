@@ -1,5 +1,4 @@
 import SiteAddNewTripView from '../view/site-add-new-view';
-import { nanoid } from 'nanoid';
 import { remove, render,  RenderPosition} from '../utils/render';
 import { UserAction, UpdateType} from '../utils/const';
 
@@ -13,14 +12,14 @@ export default class NewPointPresenter  {
     this.#changeData = changeData;
   }
 
-  init = () => {
+  init = (metaData) => {
     if (this.#pointEditComponent) {
       return;
     }
 
-    this.#pointEditComponent = new SiteAddNewTripView();
+    this.#pointEditComponent = new SiteAddNewTripView(metaData);
     this.#pointEditComponent.setFormCloseClickHandler(this.#handleFormSubmit);
-    this.#pointEditComponent.setFormOpenClickHandler(this.#handleDeleteClick);
+    this.#pointEditComponent.setFormOpenClickHandler(this.#handleFormCancel);
 
     render(this.#pointListContainer, this.#pointEditComponent, RenderPosition.AFTERBEGIN);
 
@@ -38,19 +37,42 @@ export default class NewPointPresenter  {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
+  setSaving = () => {
+    this.#pointEditComponent.updateData({
+      isDisabled: true,
+      isSaving: true,
+    });
+
+  }
+
+  setAborting = () => {
+    const resetFormState = () => {
+      this.#pointEditComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this.#pointEditComponent.shake(resetFormState);
+  }
+
   #handleFormSubmit = (point) => {
     this.#changeData(
       UserAction.ADD_TASK,
       UpdateType.MINOR,
-      {id: nanoid(), ...point},
+      point,
     );
-
-    this.destroy();
   }
 
-  #handleDeleteClick = () => {
+  #handleFormCancel = () => {
     this.destroy();
+
+    this.#changeData(
+      UserAction.CANCEL_TASK,
+    );
   }
+
 
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
@@ -58,5 +80,4 @@ export default class NewPointPresenter  {
       this.destroy();
     }
   }
-
 }

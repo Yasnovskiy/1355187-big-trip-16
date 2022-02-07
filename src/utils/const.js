@@ -16,6 +16,7 @@ export const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR',
+  INIT: 'INIT',
 };
 
 export const FilterType = {
@@ -30,3 +31,14 @@ export const MenuItem = {
   STATS: 'STATS',
 };
 
+export const typeName = [
+  'flight',
+  'bus',
+  'train',
+  'ship',
+  'drive',
+  'check-in',
+  'sightseeing',
+  'restaurant',
+  'taxi',
+];
