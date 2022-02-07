@@ -4,7 +4,6 @@ import { RenderPosition, render, remove } from './utils/render.js';
 import SiteMenuView from './view/site-menu-view.js';
 import SiteTripInfoView from './view/site-trip-info-view.js';
 import StatisticsView from './view/statistics-view.js';
-import SiteBtnNewEventView from './view/site-btn-new-event.js';
 
 import PointsModel from './model/points-model.js';
 import FilterModel from './model/filter-model.js';
@@ -31,7 +30,6 @@ const tripPresenter = new TripPresenter(siteTripMain, siteMainTripEvents, points
 const tripInfoComponent = new SiteTripInfoView(pointsModel.points);
 
 const menuComponent = new SiteMenuView();
-const btrFsfs = new SiteBtnNewEventView();
 
 pointsModel.addObserver((type, points) => {
   tripInfoComponent.apdatePrice(points);
@@ -42,22 +40,22 @@ let statisticsComponent = null;
 export const handleSiteMenuClick = (menuItem) => {
 
   switch (menuItem) {
-    case MenuItem.ADD_POINT:
-
-      console.log('Нажимаю');
-
-      break;
     case MenuItem.TABLE:
       remove(statisticsComponent);
 
       filterPresenter.init();
       tripPresenter.init();
+      tripPresenter.removeDisableBtn();
+
       break;
     case MenuItem.STATS:
+
       filterPresenter.destroy();
+      tripPresenter.disableBtn();
       tripPresenter.destroy();
 
       statisticsComponent = new StatisticsView(pointsModel.points);
+
       render(siteMainTripEvents, statisticsComponent, RenderPosition.AFTEREND);
       break;
   }
@@ -70,7 +68,6 @@ pointsModel.init().finally(() => {
   render(siteNavigationElement, menuComponent, RenderPosition.BEFOREEND);
 
   menuComponent.setMenuClickHandler(handleSiteMenuClick);
-  btrFsfs.setClickBtn(handleSiteMenuClick);
 
   filterPresenter.init();
 });

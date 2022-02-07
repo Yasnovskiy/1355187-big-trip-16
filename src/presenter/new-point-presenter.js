@@ -19,7 +19,7 @@ export default class NewPointPresenter  {
 
     this.#pointEditComponent = new SiteAddNewTripView(metaData);
     this.#pointEditComponent.setFormCloseClickHandler(this.#handleFormSubmit);
-    this.#pointEditComponent.setFormOpenClickHandler(this.#handleDeleteClick);
+    this.#pointEditComponent.setFormOpenClickHandler(this.#handleFormCancel);
 
     render(this.#pointListContainer, this.#pointEditComponent, RenderPosition.AFTERBEGIN);
 
@@ -65,9 +65,14 @@ export default class NewPointPresenter  {
     );
   }
 
-  #handleDeleteClick = () => {
+  #handleFormCancel = () => {
     this.destroy();
+
+    this.#changeData(
+      UserAction.CANCEL_TASK,
+    );
   }
+
 
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {

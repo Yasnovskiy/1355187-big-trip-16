@@ -122,6 +122,14 @@ export default class TripPresenter {
     this.#filterModel.removeObserver(this.#handleModelEvent);
   }
 
+  disableBtn = () => {
+    this.#tripBtnNewEvent.disabledButton();
+  }
+
+  removeDisableBtn = () => {
+    this.#tripBtnNewEvent.removeDisabled();
+  }
+
   #handleModeChange = () => {
     this.#pointNewPresenter.destroy();
     this.#tripBtnNewEvent.removeDisabled();
@@ -142,7 +150,7 @@ export default class TripPresenter {
     this.#pointNewPresenter.init({...BLANK_POINT,
       destinations: [...destinations],
       offerArray: [...offers],
-      offers: offers.find((item) => item.type === BLANK_POINT.type).offers,
+      typeOffer: offers.find((item) => item.type === BLANK_POINT.type).offers,
     });
 
     this.#tripBtnNewEvent.disabledButton();
@@ -168,10 +176,13 @@ export default class TripPresenter {
           await this.#pointsModel.addTrip(updateType, update);
           this.#tripBtnNewEvent.removeDisabled();
         } catch(err) {
-
           this.#pointNewPresenter.setAborting();
 
         }
+        break;
+      case UserAction.CANCEL_TASK:
+
+        this.#tripBtnNewEvent.removeDisabled();
         break;
       case UserAction.DELETE_TASK:
         this.#pointPresenter.get(update.id).setViewState(PointerPresenterViewState.DELETING);

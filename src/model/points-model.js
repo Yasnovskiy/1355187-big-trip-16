@@ -114,11 +114,12 @@ export default class PointsModel extends AbstractObservable {
   #adaptToClient = (point, destinations, offers) => {
     const adaptedTask = {...point,
       basePrice: point['base_price'],
-      dateFrom: point['date_from'] !== null ? new Date(point['date_from']) : point['date_from'], // На клиенте дата хранится как экземпляр Date
-      dateTo: point['date_to'] !== null ? new Date(point['date_to']) : point['date_to'], // На клиенте дата хранится как экземпляр Date
+      dateFrom: point['date_from'] !== null ? new Date(point['date_from']) : point['date_from'],
+      dateTo: point['date_to'] !== null ? new Date(point['date_to']) : point['date_to'],
       isFavorite: point['is_favorite'],
       destinations: [...destinations],
       offerArray: [...offers],
+      typeOffer: offers.find((item) => item.type === point.type).offers,
     };
 
     delete adaptedTask['base_price'];

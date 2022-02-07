@@ -39,21 +39,23 @@ const createTypeItemTemplate = (array, type, isDisabled) => (
 );
 
 
-const createOffersemplate = (obj) => (
-  `${obj.length > 0 || undefined ? `
+const createOffersemplate = (typeOffer, offers) => {
+  const idTextOffers = offers.map((offer) => offer.id);
+
+  return `${typeOffer.length > 0 || undefined ? `
     <section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-        ${obj.map(({id, title, price}) => `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="${id}" type="checkbox" value='${price}' name="event-offer-luggage" checked>
+        ${typeOffer.map(({id, title, price}) => `<div class="event__offer-selector">
+        <input class="event__offer-checkbox  visually-hidden" id="${id}" type="checkbox" value='${price}' name="event-offer-luggage" ${idTextOffers.includes(id) ? 'checked' : '' }>
         <label class="event__offer-label" for="${id}">
           <span class="event__offer-title">${title}</span>
             &plus;&euro;&nbsp;
           <span class="event__offer-price">${price}</span>
         </label>
       </div>`).join('')}
-    </section>`: ''}`
-);
+    </section>`: ''}`;
+};
 
 const createOptionTemplate = (obj) => (
   ` ${obj? `
@@ -63,7 +65,7 @@ const createOptionTemplate = (obj) => (
 );
 
 const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
-  const { id, basePrice, dateFrom, dateTo, offers, destination, destinations,  type, isDisabled, isSaving, isDeleting} = obj;
+  const { id, basePrice, dateFrom, dateTo, offers, typeOffer, destination, destinations,  type, isDisabled, isSaving, isDeleting} = obj;
 
   const buttonOption = currentFilter ?
     `<button class="event__reset-btn" type="reset">${isDeleting ? 'Delete...' : 'Delete'}</button>
@@ -120,7 +122,7 @@ const createSiteAddNewTripTemplate = (obj, currentFilter = false) => {
         ${buttonOption}
     </header>
     <section class="event__details">
-      ${createOffersemplate(offers)}
+      ${createOffersemplate(typeOffer, offers)}
       ${createDestinationTemplate(destination)}
     </section>
   </form>
@@ -235,11 +237,11 @@ export default class SiteAddNewTripView extends SmartView {
 
   #setInnerHandlers = () => {
     this.element.querySelector('.event__type-group').addEventListener('change', this.#typeChangeHandler);
-    this.element.querySelector('.event__type-group').addEventListener('change', this.#dueDateEndChangeHrwerwandler);
-    this.element.querySelector('.event__input--destination').addEventListener('change', this.#cityChangeHandler);
+    this.element.querySelector('.event__type-group').addEventListener('change', this.#typeOfferChanger);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
     this.element.querySelector('.event__input--price').addEventListener('change', this.#priceChangeHandler);
 
-    if (this._data.offers.length > 0) {
+    if (this._data.typeOffer.length > 0) {
       this.element.querySelector('.event__available-offers').addEventListener('change', this.#offerItemChangeHandler);
     }
   }
@@ -267,19 +269,26 @@ export default class SiteAddNewTripView extends SmartView {
   }
 
   #offerItemChangeHandler = (evt) => {
-    let offerItem;
+    const typeOfferItem = this._data.typeOffer.find((item) => item.id === Number(evt.target.id));
 
-    if (!evt.target.checked) {
-      offerItem = this._data.offers.findIndex((item) => item.id === Number(evt.target.id));
+    let arrOffers = [...this._data.offers];
+
+    const offerItemIndex = arrOffers.findIndex((offer) => offer.id === typeOfferItem.id);
+
+    if (offerItemIndex > -1) {
+
+      arrOffers = [
+        ...arrOffers.slice(0, offerItemIndex),
+        ...arrOffers.slice(offerItemIndex + 1),
+      ];
+
+    }  else {
+
+      arrOffers.push(typeOfferItem);
     }
 
-    this._data.offers = [
-      ...this._data.offers.slice(0, offerItem),
-      ...this._data.offers.slice(offerItem + 1),
-    ];
-
     this.updateData({
-      offers: this._data.offers,
+      offers: [...arrOffers],
     });
 
   }
@@ -290,7 +299,7 @@ export default class SiteAddNewTripView extends SmartView {
     });
   }
 
-  #cityChangeHandler = (evt) => {
+  #destinationChangeHandler = (evt) => {
     const newDestination = this._data.destinations.find((item) => item.name === evt.target.value);
 
     this.updateData({
@@ -298,12 +307,12 @@ export default class SiteAddNewTripView extends SmartView {
     });
   }
 
-  #dueDateEndChangeHrwerwandler = () => {
+  #typeOfferChanger = () => {
 
     const newOffers = this._data.offerArray.find((item) => item.type === this._data.type);
 
     this.updateData({
-      offers: [...newOffers.offers],
+      typeOffer: [...newOffers.offers],
     });
   }
 
